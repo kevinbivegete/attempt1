@@ -1,5 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { useAuth } from '../contexts/AuthContext';
 
 const navItemClasses = ({ isActive }: { isActive: boolean }) =>
   `flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
@@ -10,6 +11,12 @@ const navItemClasses = ({ isActive }: { isActive: boolean }) =>
 
 export const AppLayout = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <div className="flex min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50">
@@ -77,7 +84,7 @@ export const AppLayout = () => {
             </div>
             <button
               type="button"
-              onClick={() => navigate('/login')}
+              onClick={handleLogout}
               className="rounded-md bg-slate-200 dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-900 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-700"
             >
               Logout
