@@ -17,7 +17,7 @@ interface AuthContextType {
     firstName: string,
     lastName: string,
   ) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   loading: boolean;
 }
 
@@ -69,9 +69,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const logout = () => {
-    authService.logout();
-    setIsAuthenticated(false);
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      // Even if logout API fails, we still want to clear local state
+      console.error('Logout error:', error);
+    } finally {
+      setIsAuthenticated(false);
+    }
   };
 
   return (

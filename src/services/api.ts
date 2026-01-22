@@ -31,7 +31,7 @@ apiClient.interceptors.response.use(
       const currentPath = window.location.pathname;
       const isAuthPage = currentPath === '/login' || currentPath === '/register';
       
-      // Clear tokens //TODO: 
+      // Clear tokens //TODO: localStorage? Really?
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       

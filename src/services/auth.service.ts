@@ -33,6 +33,12 @@ export interface LoginResponse {
   };
 }
 
+export interface LogoutResponse {
+  success: boolean;
+  message?: string;
+  timestamp?: string;
+}
+
 export const authService = {
   register: async (data: RegisterRequest): Promise<RegisterResponse> => {
     const response = await apiClient.post<RegisterResponse>(
@@ -47,9 +53,19 @@ export const authService = {
     return response.data;
   },
 
-  logout: () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+  logout: async (): Promise<void> => {
+    try {
+      // Call the logout API endpoint
+      await apiClient.post<LogoutResponse>('/auth/logout');
+    } catch (error) {
+      // Even if API call fails, we should still clear tokens locally
+      // This ensures logout works even if backend is unreachable
+      console.error('Logout API call failed:', error);
+    } finally {
+      // Always clear tokens from localStorage regardless of API call result
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+    }
   },
 
   getAccessToken: (): string | null => {
