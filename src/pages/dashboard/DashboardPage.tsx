@@ -10,8 +10,10 @@ export const DashboardPage = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-50">Dashboard</h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
+          Dashboard
+        </h1>
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           High-level overview of loan products, applications, approvals, and
           disbursements.
         </p>
@@ -21,10 +23,12 @@ export const DashboardPage = () => {
         {stats.map((s) => (
           <div
             key={s.label}
-            className="rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3 shadow-sm"
+            className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 px-4 py-3 shadow-sm"
           >
-            <div className="text-xs font-medium text-slate-400">{s.label}</div>
-            <div className="mt-2 text-xl font-semibold text-slate-50">
+            <div className="text-xs font-medium text-slate-600 dark:text-slate-400">
+              {s.label}
+            </div>
+            <div className="mt-2 text-xl font-semibold text-slate-900 dark:text-slate-50">
               {s.value}
             </div>
           </div>
@@ -32,9 +36,9 @@ export const DashboardPage = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-100">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
               Quick Actions
             </h2>
           </div>
@@ -47,30 +51,30 @@ export const DashboardPage = () => {
             </a>
             <a
               href="/loans/new"
-              className="rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-100 hover:bg-slate-700"
+              className="rounded-md bg-slate-200 dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-900 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-700"
             >
               New Loan Application
             </a>
             <a
               href="/approvals"
-              className="rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-100 hover:bg-slate-700"
+              className="rounded-md bg-slate-200 dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-900 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-700"
             >
               Pending Approvals
             </a>
             <a
               href="/disbursements"
-              className="rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-100 hover:bg-slate-700"
+              className="rounded-md bg-slate-200 dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-900 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-700"
             >
               Pending Disbursements
             </a>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <h2 className="mb-2 text-sm font-semibold text-slate-100">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
+          <h2 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
             Recent Activity
           </h2>
-          <ul className="space-y-1 text-xs text-slate-300">
+          <ul className="space-y-1 text-xs text-slate-700 dark:text-slate-300">
             <li>
               Loan LOAN-2025-001 approved for 50,000, awaiting disbursement.
             </li>
