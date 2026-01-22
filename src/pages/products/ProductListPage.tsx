@@ -17,8 +17,10 @@ export const ProductListPage = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-50">Loan Products</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
+            Loan Products
+          </h1>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             Configure products, fees, eligibility rules, and approval workflows.
           </p>
         </div>
@@ -30,8 +32,8 @@ export const ProductListPage = () => {
         </a>
       </div>
 
-      <div className="flex flex-wrap gap-2 text-xs text-slate-300">
-        <select className="rounded-md border border-slate-800 bg-slate-900 px-2 py-1">
+      <div className="flex flex-wrap gap-2 text-xs text-slate-700 dark:text-slate-300">
+        <select className="rounded-md border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 py-1 text-slate-900 dark:text-slate-100">
           <option>Status: All</option>
           <option>Active</option>
           <option>Inactive</option>
@@ -39,13 +41,13 @@ export const ProductListPage = () => {
         <input
           type="text"
           placeholder="Search by code or name"
-          className="w-56 rounded-md border border-slate-800 bg-slate-900 px-2 py-1 text-xs placeholder:text-slate-500"
+          className="w-56 rounded-md border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 py-1 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-500"
         />
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60">
+      <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60">
         <table className="min-w-full text-left text-xs">
-          <thead className="bg-slate-900/80 text-slate-400">
+          <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-700 dark:text-slate-400">
             <tr>
               <th className="px-4 py-2 font-medium">Code</th>
               <th className="px-4 py-2 font-medium">Name</th>
@@ -60,31 +62,41 @@ export const ProductListPage = () => {
             {products.map((p) => (
               <tr
                 key={p.id}
-                className="border-t border-slate-800 hover:bg-slate-800/60"
+                className="border-t border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60"
               >
-                <td className="px-4 py-2 text-slate-100">{p.code}</td>
-                <td className="px-4 py-2 text-slate-100">{p.name}</td>
+                <td className="px-4 py-2 text-slate-900 dark:text-slate-100">
+                  {p.code}
+                </td>
+                <td className="px-4 py-2 text-slate-900 dark:text-slate-100">
+                  {p.name}
+                </td>
                 <td className="px-4 py-2">
-                  <span className="inline-flex rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
+                  <span className="inline-flex rounded-full bg-emerald-100 dark:bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
                     {p.status}
                   </span>
                 </td>
-                <td className="px-4 py-2 text-slate-200">
+                <td className="px-4 py-2 text-slate-700 dark:text-slate-200">
                   {p.minAmount} – {p.maxAmount}
                 </td>
-                <td className="px-4 py-2 text-slate-200">{p.interest}</td>
-                <td className="px-4 py-2 text-slate-200">{p.tenure}</td>
+                <td className="px-4 py-2 text-slate-700 dark:text-slate-200">
+                  {p.interest}
+                </td>
+                <td className="px-4 py-2 text-slate-700 dark:text-slate-200">
+                  {p.tenure}
+                </td>
                 <td className="px-4 py-2 text-right">
                   <a
                     href={`/products/${p.id}`}
-                    className="text-xs font-medium text-primary-400 hover:text-primary-300"
+                    className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300"
                   >
                     View
                   </a>
-                  <span className="mx-1 text-slate-600">•</span>
+                  <span className="mx-1 text-slate-400 dark:text-slate-600">
+                    •
+                  </span>
                   <a
                     href={`/products/${p.id}/edit`}
-                    className="text-xs font-medium text-slate-200 hover:text-slate-50"
+                    className="text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-slate-50"
                   >
                     Edit
                   </a>
