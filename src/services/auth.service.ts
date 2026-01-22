@@ -1,4 +1,13 @@
 import apiClient from './api';
+import axios from 'axios';
+
+// Separate axios instance for refresh token calls (no interceptors to avoid loops)
+const refreshClient = axios.create({
+  baseURL: 'http://localhost:8000/api/v1',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 export interface RegisterRequest {
   tenantId: string;
@@ -54,6 +63,19 @@ export interface ProfileResponse {
   timestamp: string;
 }
 
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface RefreshTokenResponse {
+  success: boolean;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
+  };
+}
+
 export const authService = {
   register: async (data: RegisterRequest): Promise<RegisterResponse> => {
     const response = await apiClient.post<RegisterResponse>(
@@ -98,6 +120,15 @@ export const authService = {
 
   getProfile: async (): Promise<ProfileResponse> => {
     const response = await apiClient.get<ProfileResponse>('/auth/profile');
+    return response.data;
+  },
+
+  refreshToken: async (refreshToken: string): Promise<RefreshTokenResponse> => {
+    // Use separate axios instance without interceptors to avoid loops
+    const response = await refreshClient.post<RefreshTokenResponse>(
+      '/auth/refresh',
+      { refreshToken }
+    );
     return response.data;
   },
 };
