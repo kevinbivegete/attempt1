@@ -39,6 +39,21 @@ export interface LogoutResponse {
   timestamp?: string;
 }
 
+export interface UserProfile {
+  userId: string;
+  email: string;
+  tenantId: string;
+  category: string;
+  roles: string[];
+  permissions: string[];
+}
+
+export interface ProfileResponse {
+  success: boolean;
+  data: UserProfile;
+  timestamp: string;
+}
+
 export const authService = {
   register: async (data: RegisterRequest): Promise<RegisterResponse> => {
     const response = await apiClient.post<RegisterResponse>(
@@ -79,5 +94,10 @@ export const authService = {
   setTokens: (accessToken: string, refreshToken: string) => {
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
+  },
+
+  getProfile: async (): Promise<ProfileResponse> => {
+    const response = await apiClient.get<ProfileResponse>('/auth/profile');
+    return response.data;
   },
 };

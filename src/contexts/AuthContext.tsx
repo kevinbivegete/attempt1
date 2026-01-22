@@ -5,10 +5,11 @@ import React, {
   useEffect,
   ReactNode,
 } from 'react';
-import { authService } from '../services/auth.service';
+import { authService, UserProfile } from '../services/auth.service';
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  user: UserProfile | null;
   login: (email: string, password: string) => Promise<void>;
   register: (
     tenantId: string,
@@ -19,19 +20,40 @@ interface AuthContextType {
   ) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
+  hasRole: (role: string) => boolean;
+  hasPermission: (permission: string) => boolean;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchProfile = async () => {
+    try {
+      const response = await authService.getProfile();
+      setUser(response.data);
+    } catch (error) {
+      console.error('Failed to fetch user profile:', error);
+      // Don't throw - allow app to continue even if profile fetch fails
+      setUser(null);
+    }
+  };
+
   useEffect(() => {
-    // Check if user is already authenticated
-    const token = authService.getAccessToken();
-    setIsAuthenticated(!!token);
-    setLoading(false);
+    const initializeAuth = async () => {
+      const token = authService.getAccessToken();
+      if (token) {
+        setIsAuthenticated(true);
+        // Fetch user profile if token exists
+        await fetchProfile();
+      }
+      setLoading(false);
+    };
+    initializeAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -42,6 +64,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         response.data.refreshToken,
       );
       setIsAuthenticated(true);
+      // Fetch user profile after successful login
+      await fetchProfile();
     } catch (error) {
       throw error;
     }
@@ -77,12 +101,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error('Logout error:', error);
     } finally {
       setIsAuthenticated(false);
+      setUser(null); // Clear user profile on logout
     }
+  };
+
+  const hasRole = (role: string): boolean => {
+    return user?.roles?.includes(role) ?? false;
+  };
+
+  const hasPermission = (permission: string): boolean => {
+    return user?.permissions?.includes(permission) ?? false;
+  };
+
+  const refreshProfile = async () => {
+    await fetchProfile();
   };
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, login, register, logout, loading }}
+      value={{
+        isAuthenticated,
+        user,
+        login,
+        register,
+        logout,
+        loading,
+        hasRole,
+        hasPermission,
+        refreshProfile,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -11,7 +11,7 @@ const navItemClasses = ({ isActive }: { isActive: boolean }) =>
 
 export const AppLayout = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -82,16 +82,20 @@ export const AppLayout = () => {
         </nav>
         <div className="border-t border-slate-200 dark:border-slate-800 px-4 py-3 text-xs text-slate-600 dark:text-slate-400">
           <div className="flex items-center justify-between">
-            <div>
-              <div className="font-medium text-slate-900 dark:text-slate-200">
-                Demo User
+            <div className="min-w-0 flex-1">
+              <div className="font-medium text-slate-900 dark:text-slate-200 truncate">
+                {user?.email || 'Loading...'}
               </div>
-              <div>Role: Loan Officer</div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                {user?.roles && user.roles.length > 0
+                  ? `Role: ${user.roles.join(', ')}`
+                  : 'No roles assigned'}
+              </div>
             </div>
             <button
               type="button"
               onClick={handleLogout}
-              className="rounded-md bg-slate-200 dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-900 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-700"
+              className="ml-2 flex-shrink-0 rounded-md bg-slate-200 dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-900 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-700"
             >
               Logout
             </button>
