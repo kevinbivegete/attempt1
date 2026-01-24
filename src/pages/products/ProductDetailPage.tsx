@@ -1,128 +1,287 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { productService, Product } from '../../services/product.service';
+import { getErrorMessage } from '../../utils/errorHandler';
+
 export const ProductDetailPage = () => {
-  // For now this is a static layout; later, fetch by product id from the API
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      loadProduct();
+    }
+  }, [id]);
+
+  const loadProduct = async () => {
+    if (!id) return;
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await productService.findOne(id);
+      setProduct(data);
+    } catch (err: any) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleActivate = async () => {
+    if (!id) return;
+    try {
+      setActionLoading(true);
+      await productService.activate(id);
+      await loadProduct();
+    } catch (err: any) {
+      alert(getErrorMessage(err));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeactivate = async () => {
+    if (!id) return;
+    try {
+      setActionLoading(true);
+      await productService.deactivate(id);
+      await loadProduct();
+    } catch (err: any) {
+      alert(getErrorMessage(err));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-sm text-slate-600 dark:text-slate-400">
+          Loading product...
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-md bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 px-3 py-2 text-xs text-rose-700 dark:text-rose-300">
+          {error || 'Product not found'}
+        </div>
+        <button
+          onClick={() => navigate('/products')}
+          className="rounded-md bg-primary-500 px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-primary-400"
+        >
+          Back to Products
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-50">
-            SME Business Loan
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
+            {product.productName}
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
-            Product SME-001 • Active • Linked loans: 32
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            Product {product.productCode} •{' '}
+            {product.isActive ? 'Active' : 'Inactive'}
           </p>
         </div>
         <div className="flex gap-2">
-          <a
-            href="/products/1/edit"
-            className="rounded-md bg-slate-800 px-3 py-2 text-xs font-medium text-slate-100 hover:bg-slate-700"
+          <button
+            onClick={() => navigate(`/products/${product.id}/edit`)}
+            className="rounded-md bg-primary-500 px-3 py-2 text-xs font-medium text-slate-950 hover:bg-primary-400"
           >
             Edit Product
-          </a>
-          <button className="rounded-md border border-slate-700 px-3 py-2 text-xs font-medium text-amber-300 hover:bg-slate-800">
-            Deactivate
           </button>
+          {product.isActive ? (
+            <button
+              onClick={handleDeactivate}
+              disabled={actionLoading}
+              className="rounded-md border border-amber-300 dark:border-amber-700 px-3 py-2 text-xs font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 disabled:opacity-50"
+            >
+              {actionLoading ? 'Deactivating...' : 'Deactivate'}
+            </button>
+          ) : (
+            <button
+              onClick={handleActivate}
+              disabled={actionLoading}
+              className="rounded-md border border-emerald-300 dark:border-emerald-700 px-3 py-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 disabled:opacity-50"
+            >
+              {actionLoading ? 'Activating...' : 'Activate'}
+            </button>
+          )}
         </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-            <h2 className="mb-3 text-sm font-semibold text-slate-100">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
+            <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
               Core Information
             </h2>
-            <dl className="grid gap-3 text-xs text-slate-200 sm:grid-cols-2">
+            <dl className="grid gap-3 text-xs text-slate-700 dark:text-slate-200 sm:grid-cols-2">
               <div>
-                <dt className="text-slate-400">Product Code</dt>
-                <dd>SME-001</dd>
+                <dt className="text-slate-500 dark:text-slate-400">
+                  Product Code
+                </dt>
+                <dd className="font-medium">{product.productCode}</dd>
               </div>
               <div>
-                <dt className="text-slate-400">Name</dt>
-                <dd>SME Business Loan</dd>
+                <dt className="text-slate-500 dark:text-slate-400">Name</dt>
+                <dd className="font-medium">{product.productName}</dd>
+              </div>
+              {product.description && (
+                <div className="sm:col-span-2">
+                  <dt className="text-slate-500 dark:text-slate-400">
+                    Description
+                  </dt>
+                  <dd className="mt-1">{product.description}</dd>
+                </div>
+              )}
+              <div>
+                <dt className="text-slate-500 dark:text-slate-400">
+                  Min / Max Amount
+                </dt>
+                <dd className="font-medium">
+                  {formatCurrency(product.minLoanAmount)} –{' '}
+                  {formatCurrency(product.maxLoanAmount)}
+                </dd>
               </div>
               <div>
-                <dt className="text-slate-400">Min / Max Amount</dt>
-                <dd>5,000 – 500,000</dd>
+                <dt className="text-slate-500 dark:text-slate-400">
+                  Interest Rate
+                </dt>
+                <dd className="font-medium">
+                  {product.interestRate}% {product.interestRateType}
+                </dd>
               </div>
               <div>
-                <dt className="text-slate-400">Interest Rate</dt>
-                <dd>18% Flat</dd>
+                <dt className="text-slate-500 dark:text-slate-400">Tenure</dt>
+                <dd className="font-medium">{product.tenureMonths} months</dd>
               </div>
               <div>
-                <dt className="text-slate-400">Tenure</dt>
-                <dd>6–36 months</dd>
+                <dt className="text-slate-500 dark:text-slate-400">
+                  Repayment Schedule
+                </dt>
+                <dd className="font-medium">{product.repaymentScheduleType}</dd>
               </div>
               <div>
-                <dt className="text-slate-400">Repayment Schedule</dt>
-                <dd>Monthly</dd>
+                <dt className="text-slate-500 dark:text-slate-400">
+                  Requires Collateral
+                </dt>
+                <dd className="font-medium">
+                  {product.requiresCollateral ? 'Yes' : 'No'}
+                </dd>
               </div>
               <div>
-                <dt className="text-slate-400">Requires Collateral</dt>
-                <dd>Yes</dd>
-              </div>
-              <div>
-                <dt className="text-slate-400">Status</dt>
+                <dt className="text-slate-500 dark:text-slate-400">Status</dt>
                 <dd>
-                  <span className="inline-flex rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
-                    Active
+                  <span
+                    className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                      product.isActive
+                        ? 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400'
+                    }`}
+                  >
+                    {product.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </dd>
               </div>
+              {product.defaultDisbursementAccount && (
+                <div>
+                  <dt className="text-slate-500 dark:text-slate-400">
+                    Default Disbursement Account
+                  </dt>
+                  <dd className="font-medium">
+                    {product.defaultDisbursementAccount}
+                  </dd>
+                </div>
+              )}
+              {product.defaultGLAccount && (
+                <div>
+                  <dt className="text-slate-500 dark:text-slate-400">
+                    Default GL Account
+                  </dt>
+                  <dd className="font-medium">{product.defaultGLAccount}</dd>
+                </div>
+              )}
             </dl>
           </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-            <h2 className="mb-3 text-sm font-semibold text-slate-100">
-              Eligibility Rules
-            </h2>
-            <ul className="space-y-2 text-xs text-slate-200">
-              <li>• Minimum age 21, maximum age 65 at end of tenure.</li>
-              <li>• Net monthly income ≥ 2x monthly installment.</li>
-              <li>• Credit score &gt;= 650 and no active write-offs.</li>
-            </ul>
-          </div>
+          {product.eligibilityRules && product.eligibilityRules.length > 0 && (
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
+              <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                Eligibility Rules
+              </h2>
+              <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-200">
+                {product.eligibilityRules.map((rule) => (
+                  <li key={rule.id}>
+                    • {rule.ruleName}: {rule.ruleType} {rule.operator}{' '}
+                    {rule.value}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-            <h2 className="mb-2 text-sm font-semibold text-slate-100">Fees</h2>
-            <ul className="space-y-2 text-xs text-slate-200">
-              <li>
-                <div className="flex items-center justify-between">
-                  <span>Origination Fee</span>
-                  <span>2.0% (upfront)</span>
-                </div>
-              </li>
-              <li>
-                <div className="flex items-center justify-between">
-                  <span>Processing Fee</span>
-                  <span>Flat 50,000</span>
-                </div>
-              </li>
-            </ul>
-          </div>
+          {product.fees && product.fees.length > 0 && (
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
+              <h2 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                Fees
+              </h2>
+              <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-200">
+                {product.fees.map((fee) => (
+                  <li key={fee.id}>
+                    <div className="flex items-center justify-between">
+                      <span>{fee.feeName}</span>
+                      <span className="font-medium">
+                        {fee.isPercentage
+                          ? `${fee.feePercentage}%`
+                          : formatCurrency(fee.feeAmount || 0)}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-            <h2 className="mb-2 text-sm font-semibold text-slate-100">
-              Approval Workflow
-            </h2>
-            <ul className="space-y-2 text-xs text-slate-200">
-              <li>• Loan Officer up to 10,000.</li>
-              <li>• Branch Manager up to 100,000.</li>
-              <li>• Credit Committee above 100,000.</li>
-            </ul>
-          </div>
-
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-            <h2 className="mb-2 text-sm font-semibold text-slate-100">
-              Linked Loans
-            </h2>
-            <p className="text-xs text-slate-400">
-              32 active / 48 total loans using this product.
-            </p>
-            <button className="mt-2 w-full rounded-md border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-100 hover:bg-slate-800">
-              View Loans
-            </button>
-          </div>
+          {product.approvalWorkflows &&
+            product.approvalWorkflows.length > 0 && (
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
+                <h2 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  Approval Workflow
+                </h2>
+                <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-200">
+                  {product.approvalWorkflows.map((workflow) => (
+                    <li key={workflow.id}>
+                      • {workflow.approverRole}:{' '}
+                      {formatCurrency(workflow.minAmount)} –{' '}
+                      {formatCurrency(workflow.maxAmount)} (Level{' '}
+                      {workflow.approvalLevel})
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
         </div>
       </div>
     </div>

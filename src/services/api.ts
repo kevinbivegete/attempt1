@@ -1,14 +1,41 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { authService } from './auth.service';
 
-const BASE_URL = 'http://localhost:8000/api/v1';
+// Products/Origination/Disbursement backend (port 3000)
+const PRODUCTS_BASE_URL = 'http://localhost:3000/api/v1';
 
+// Auth backend (port 3001)
+const AUTH_BASE_URL = 'http://localhost:3001/api/v1';
+
+// API client for products, origination, disbursement endpoints
 export const apiClient = axios.create({
-  baseURL: BASE_URL,
+  baseURL: PRODUCTS_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// API client for authentication endpoints
+export const authApiClient = axios.create({
+  baseURL: AUTH_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add request interceptor to auth client to include auth token
+authApiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // Track if we're currently refreshing the token
 let isRefreshing = false;

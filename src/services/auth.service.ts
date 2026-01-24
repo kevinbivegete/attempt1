@@ -1,9 +1,10 @@
-import apiClient from './api';
+import { authApiClient } from './api';
 import axios from 'axios';
 
 // Separate axios instance for refresh token calls (no interceptors to avoid loops)
+// Points to auth service on port 3001
 const refreshClient = axios.create({
-  baseURL: 'http://localhost:8000/api/v1',
+  baseURL: 'http://localhost:3001/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -78,7 +79,7 @@ export interface RefreshTokenResponse {
 
 export const authService = {
   register: async (data: RegisterRequest): Promise<RegisterResponse> => {
-    const response = await apiClient.post<RegisterResponse>(
+    const response = await authApiClient.post<RegisterResponse>(
       '/auth/register',
       data
     );
@@ -86,14 +87,14 @@ export const authService = {
   },
 
   login: async (data: LoginRequest): Promise<LoginResponse> => {
-    const response = await apiClient.post<LoginResponse>('/auth/login', data);
+    const response = await authApiClient.post<LoginResponse>('/auth/login', data);
     return response.data;
   },
 
   logout: async (): Promise<void> => {
     try {
       // Call the logout API endpoint
-      await apiClient.post<LogoutResponse>('/auth/logout');
+      await authApiClient.post<LogoutResponse>('/auth/logout');
     } catch (error) {
       // Even if API call fails, we should still clear tokens locally
       // This ensures logout works even if backend is unreachable
@@ -119,7 +120,7 @@ export const authService = {
   },
 
   getProfile: async (): Promise<ProfileResponse> => {
-    const response = await apiClient.get<ProfileResponse>('/auth/profile');
+    const response = await authApiClient.get<ProfileResponse>('/auth/profile');
     return response.data;
   },
 
