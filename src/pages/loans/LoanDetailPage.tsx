@@ -200,9 +200,16 @@ export const LoanDetailPage = () => {
           </div>
 
           <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-            <h2 className="mb-3 text-sm font-semibold text-slate-100">
+            <h2 className="mb-1 text-sm font-semibold text-slate-100">
               Disbursement Summary
             </h2>
+            <p className="mb-2 text-[11px] text-slate-400">
+              {loan.disbursedAmount
+                ? loan.status === 'Disbursed'
+                  ? 'Loan fully disbursed.'
+                  : 'Loan partially disbursed; additional disbursements are allowed up to the approved amount.'
+                : 'No disbursements have been completed yet.'}
+            </p>
             <dl className="grid gap-3 text-xs text-slate-200 sm:grid-cols-3">
               <div>
                 <dt className="text-slate-400">Total Approved</dt>
@@ -246,7 +253,14 @@ export const LoanDetailPage = () => {
               After approval, initiate disbursement from here and view
               disbursement history.
             </p>
-            <button className="mt-2 w-full rounded-md bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-100 hover:bg-slate-700">
+            <button
+              onClick={() =>
+                navigate('/disbursements/new', {
+                  state: { loanId: loan.id },
+                })
+              }
+              className="mt-2 w-full rounded-md bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-100 hover:bg-slate-700"
+            >
               Initiate Disbursement
             </button>
           </div>

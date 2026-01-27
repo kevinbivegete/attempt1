@@ -340,7 +340,7 @@ export const LoanFormPage = () => {
           <div className="flex gap-2 pt-2">
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || !eligibilityResult || !eligibilityResult.isEligible}
               className="flex-1 rounded-md bg-primary-500 px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-primary-400 disabled:opacity-50"
             >
               {submitting ? 'Creating...' : 'Create Application'}
