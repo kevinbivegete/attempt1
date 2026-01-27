@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { productService, Product } from '../../services/product.service';
 import { getErrorMessage } from '../../utils/errorHandler';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 
 export const ProductDetailPage = () => {
   const navigate = useNavigate();
@@ -10,6 +11,8 @@ export const ProductDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -54,6 +57,19 @@ export const ProductDetailPage = () => {
       alert(getErrorMessage(err));
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+    try {
+      setDeleteLoading(true);
+      await productService.delete(id);
+      navigate('/products');
+    } catch (err: any) {
+      alert(getErrorMessage(err));
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -108,6 +124,13 @@ export const ProductDetailPage = () => {
             className="rounded-md bg-primary-500 px-3 py-2 text-xs font-medium text-slate-950 hover:bg-primary-400"
           >
             Edit Product
+          </button>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={deleteLoading}
+            className="rounded-md border border-rose-300 dark:border-rose-700 px-3 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 disabled:opacity-50"
+          >
+            {deleteLoading ? 'Deleting...' : 'Delete'}
           </button>
           {product.isActive ? (
             <button
@@ -284,6 +307,19 @@ export const ProductDetailPage = () => {
             )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="Delete product"
+        message="Are you sure you want to delete this product? This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={async () => {
+          await handleDelete();
+          setShowDeleteConfirm(false);
+        }}
+      />
     </div>
   );
 };

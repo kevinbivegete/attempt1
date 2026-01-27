@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productService, Product } from '../../services/product.service';
 import { getErrorMessage } from '../../utils/errorHandler';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 
 export const ProductListPage = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export const ProductListPage = () => {
     'all' | 'active' | 'inactive'
   >('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
 
   useEffect(() => {
     loadProducts();
@@ -53,13 +55,6 @@ export const ProductListPage = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (
-      !confirm(
-        'Are you sure you want to delete this product? This action cannot be undone.',
-      )
-    ) {
-      return;
-    }
     try {
       await productService.delete(id);
       await loadProducts(); // Reload list
@@ -210,6 +205,15 @@ export const ProductListPage = () => {
                       <span className="mx-1 text-slate-400 dark:text-slate-600">
                         •
                       </span>
+                      <button
+                        onClick={() => setDeleteProductId(p.id)}
+                        className="text-xs font-medium text-rose-600 dark:text-rose-400 hover:text-rose-500"
+                      >
+                        Delete
+                      </button>
+                      <span className="mx-1 text-slate-400 dark:text-slate-600">
+                        •
+                      </span>
                       {p.isActive ? (
                         <button
                           onClick={() => handleDeactivate(p.id)}
@@ -233,6 +237,20 @@ export const ProductListPage = () => {
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!deleteProductId}
+        title="Delete product"
+        message={`Are you sure you want to delete this product? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onCancel={() => setDeleteProductId(null)}
+        onConfirm={async () => {
+          if (!deleteProductId) return;
+          await handleDelete(deleteProductId);
+          setDeleteProductId(null);
+        }}
+      />
     </div>
   );
 };
