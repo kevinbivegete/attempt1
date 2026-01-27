@@ -21,7 +21,10 @@ export const ProductListPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const includeInactive = statusFilter === 'all';
+      // Include inactive products from the backend when we need to display
+      // either all products or specifically inactive ones. If we only want
+      // active products, we can limit the query to active records.
+      const includeInactive = statusFilter !== 'active';
       const data = await productService.findAll(includeInactive);
       setProducts(data);
     } catch (err: any) {
