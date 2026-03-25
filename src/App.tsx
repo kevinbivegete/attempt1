@@ -13,6 +13,9 @@ import { ApprovalWorkbenchPage } from './pages/loans/ApprovalWorkbenchPage';
 import { DisbursementQueuePage } from './pages/disbursements/DisbursementQueuePage';
 import { DisbursementFormPage } from './pages/disbursements/DisbursementFormPage';
 import { DisbursementDetailPage } from './pages/disbursements/DisbursementDetailPage';
+import { CollectionListPage } from './pages/collections/CollectionListPage';
+import { CollectionFormPage } from './pages/collections/CollectionFormPage';
+import { CollectionDetailPage } from './pages/collections/CollectionDetailPage';
 import { UsersPage } from './pages/settings/UsersPage';
 import { FspSettingsPage } from './pages/settings/FspSettingsPage';
 import { useAuth } from './contexts/AuthContext';
@@ -58,11 +61,11 @@ function App() {
           path="/products/new"
           element={<ProductFormPage mode="create" />}
         />
-        <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route
           path="/products/:id/edit"
           element={<ProductFormPage mode="edit" />}
         />
+        <Route path="/products/:id" element={<ProductDetailPage />} />
 
         <Route path="/loans" element={<LoanListPage />} />
         <Route path="/loans/new" element={<LoanFormPage />} />
@@ -72,6 +75,10 @@ function App() {
         <Route path="/disbursements" element={<DisbursementQueuePage />} />
         <Route path="/disbursements/new" element={<DisbursementFormPage />} />
         <Route path="/disbursements/:id" element={<DisbursementDetailPage />} />
+
+        <Route path="/collections" element={<CollectionListPage />} />
+        <Route path="/collections/new" element={<CollectionFormPage />} />
+        <Route path="/collections/:id" element={<CollectionDetailPage />} />
 
         <Route path="/settings/users" element={<UsersPage />} />
         <Route path="/settings/fsp" element={<FspSettingsPage />} />

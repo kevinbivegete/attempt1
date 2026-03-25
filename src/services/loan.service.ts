@@ -7,6 +7,21 @@ export type LoanStatus =
     | 'Disbursed'
     | 'Active';
 
+export interface LoanCollateral {
+    id: string;
+    loanId: string;
+    collateralType: string;
+    description: string;
+    netBookValue: number;
+    recognitionRate: number;
+    recognizedValue: number;
+    registrationDate: string;
+    isReleased: boolean;
+    releasedDate?: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export interface Loan {
     id: string;
     loanNumber: string;
@@ -23,6 +38,7 @@ export interface Loan {
     rejectionReason?: string | null;
     disbursedAmount?: number | null;
     disbursedDate?: string | null;
+    collaterals?: LoanCollateral[];
     createdAt: string;
     updatedAt: string;
 }
@@ -33,12 +49,20 @@ export interface LoanQuery {
     productCode?: string;
 }
 
+export interface CreateLoanCollateralRequest {
+    collateralType: string;
+    description: string;
+    netBookValue: number;
+    recognitionRate: number;
+}
+
 export interface CreateLoanRequest {
     loanProductId: string;
     customerId: string;
     requestedAmount: number;
     interestRate?: number;
     tenureMonths?: number;
+    collaterals?: CreateLoanCollateralRequest[];
 }
 
 export interface EligibilityCheckRequest {

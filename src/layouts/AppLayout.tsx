@@ -71,6 +71,13 @@ export const AppLayout = () => {
           </NavLink>
 
           <div className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500 px-2">
+            Collections
+          </div>
+          <NavLink to="/collections" className={navItemClasses}>
+            Collection cases
+          </NavLink>
+
+          <div className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-500 px-2">
             Settings
           </div>
           <NavLink to="/settings/users" className={navItemClasses}>
