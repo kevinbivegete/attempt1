@@ -9,25 +9,17 @@ export const ProductListPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<
-    'all' | 'active' | 'inactive'
-  >('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadProducts();
-  }, [statusFilter]);
+  useEffect(() => { loadProducts(); }, [statusFilter]);
 
   const loadProducts = async () => {
     try {
       setLoading(true);
       setError(null);
-      // Include inactive products from the backend when we need to display
-      // either all products or specifically inactive ones. If we only want
-      // active products, we can limit the query to active records.
-      const includeInactive = statusFilter !== 'active';
-      const data = await productService.findAll(includeInactive);
+      const data = await productService.findAll(statusFilter !== 'active');
       setProducts(data);
     } catch (err: any) {
       setError(getErrorMessage(err));
@@ -37,198 +29,110 @@ export const ProductListPage = () => {
   };
 
   const handleActivate = async (id: string) => {
-    try {
-      await productService.activate(id);
-      await loadProducts(); // Reload list
-    } catch (err: any) {
-      alert(getErrorMessage(err));
-    }
+    try { await productService.activate(id); await loadProducts(); } catch (err: any) { alert(getErrorMessage(err)); }
   };
-
   const handleDeactivate = async (id: string) => {
-    try {
-      await productService.deactivate(id);
-      await loadProducts(); // Reload list
-    } catch (err: any) {
-      alert(getErrorMessage(err));
-    }
+    try { await productService.deactivate(id); await loadProducts(); } catch (err: any) { alert(getErrorMessage(err)); }
   };
-
   const handleDelete = async (id: string) => {
-    try {
-      await productService.delete(id);
-      await loadProducts(); // Reload list
-    } catch (err: any) {
-      alert(getErrorMessage(err));
-    }
+    try { await productService.delete(id); await loadProducts(); } catch (err: any) { alert(getErrorMessage(err)); }
   };
 
-  // Filter products by search query
-  const filteredProducts = products.filter((p) => {
-    const matchesSearch =
-      p.productCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.productName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === 'all' ||
-      (statusFilter === 'active' && p.isActive) ||
-      (statusFilter === 'inactive' && !p.isActive);
-    return matchesSearch && matchesStatus;
+  const filtered = products.filter((p) => {
+    const q = searchQuery.toLowerCase();
+    const matchSearch = !q || p.productCode.toLowerCase().includes(q) || p.productName.toLowerCase().includes(q);
+    const matchStatus = statusFilter === 'all' || (statusFilter === 'active' && p.isActive) || (statusFilter === 'inactive' && !p.isActive);
+    return matchSearch && matchStatus;
   });
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const fmt = (n: number) => new Intl.NumberFormat('en-US', { minimumFractionDigits: 0 }).format(n);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
-            Loan Products
-          </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Configure products, fees, eligibility rules, and approval workflows.
-          </p>
+        <div className="page-header mb-0">
+          <h1 className="page-title">Loan Products</h1>
+          <p className="page-subtitle">Configure products, fees, eligibility rules & approval workflows.</p>
         </div>
-        <button
-          onClick={() => navigate('/products/new')}
-          className="rounded-md bg-primary-500 px-3 py-2 text-sm font-medium text-slate-950 hover:bg-primary-400"
-        >
+        <button onClick={() => navigate('/products/new')} className="btn-primary">
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           New Product
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2 text-xs text-slate-700 dark:text-slate-300">
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
         <select
           value={statusFilter}
-          onChange={(e) =>
-            setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')
-          }
-          className="rounded-md border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 py-1 text-slate-900 dark:text-slate-100"
+          onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+          className="form-select w-36"
         >
-          <option value="all">Status: All</option>
+          <option value="all">All Status</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
         </select>
         <input
           type="text"
-          placeholder="Search by code or name"
+          placeholder="Search by code or name..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-56 rounded-md border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 py-1 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-500"
+          className="form-input w-64"
         />
+        <span className="text-xs text-neutral-400">{filtered.length} products</span>
       </div>
 
       {error && (
-        <div className="rounded-md bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 px-3 py-2 text-xs text-rose-700 dark:text-rose-300">
-          {error}
-        </div>
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-sm text-slate-600 dark:text-slate-400">
-            Loading products...
-          </div>
+        <div className="flex items-center justify-center py-16">
+          <div className="text-sm text-neutral-400">Loading products...</div>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60">
-          {filteredProducts.length === 0 ? (
-            <div className="px-4 py-8 text-center text-sm text-slate-600 dark:text-slate-400">
-              No products found
-            </div>
+        <div className="card overflow-hidden">
+          {filtered.length === 0 ? (
+            <div className="py-16 text-center text-sm text-neutral-400">No products found</div>
           ) : (
-            <table className="min-w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-700 dark:text-slate-400">
+            <table className="data-table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-2 font-medium">Code</th>
-                  <th className="px-4 py-2 font-medium">Name</th>
-                  <th className="px-4 py-2 font-medium">Status</th>
-                  <th className="px-4 py-2 font-medium">Min / Max Amount</th>
-                  <th className="px-4 py-2 font-medium">Interest</th>
-                  <th className="px-4 py-2 font-medium">Tenure</th>
-                  <th className="px-4 py-2 font-medium text-right">Actions</th>
+                  <th>Code</th>
+                  <th>Product Name</th>
+                  <th>Status</th>
+                  <th>Min / Max Amount (RWF)</th>
+                  <th>Interest</th>
+                  <th>Tenure</th>
+                  <th className="text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts.map((p) => (
-                  <tr
-                    key={p.id}
-                    className="border-t border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60"
-                  >
-                    <td className="px-4 py-2 text-slate-900 dark:text-slate-100">
-                      {p.productCode}
-                    </td>
-                    <td className="px-4 py-2 text-slate-900 dark:text-slate-100">
-                      {p.productName}
-                    </td>
-                    <td className="px-4 py-2">
-                      <span
-                        className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                          p.isActive
-                            ? 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400'
-                        }`}
-                      >
+                {filtered.map((p) => (
+                  <tr key={p.id}>
+                    <td className="font-mono text-xs text-neutral-500">{p.productCode}</td>
+                    <td className="font-medium text-neutral-800">{p.productName}</td>
+                    <td>
+                      <span className={p.isActive ? 'badge-success badge' : 'badge-neutral badge'}>
                         {p.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td className="px-4 py-2 text-slate-700 dark:text-slate-200">
-                      {formatCurrency(p.minLoanAmount)} –{' '}
-                      {formatCurrency(p.maxLoanAmount)}
-                    </td>
-                    <td className="px-4 py-2 text-slate-700 dark:text-slate-200">
-                      {p.interestRate}%
-                    </td>
-                    <td className="px-4 py-2 text-slate-700 dark:text-slate-200">
-                      {p.tenureMonths} mo
-                    </td>
-                    <td className="px-4 py-2 text-right">
-                      <button
-                        onClick={() => navigate(`/products/${p.id}`)}
-                        className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300"
-                      >
-                        View
-                      </button>
-                      <span className="mx-1 text-slate-400 dark:text-slate-600">
-                        •
-                      </span>
-                      <button
-                        onClick={() => navigate(`/products/${p.id}/edit`)}
-                        className="text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-slate-50"
-                      >
-                        Edit
-                      </button>
-                      <span className="mx-1 text-slate-400 dark:text-slate-600">
-                        •
-                      </span>
-                      <button
-                        onClick={() => setDeleteProductId(p.id)}
-                        className="text-xs font-medium text-rose-600 dark:text-rose-400 hover:text-rose-500"
-                      >
-                        Delete
-                      </button>
-                      <span className="mx-1 text-slate-400 dark:text-slate-600">
-                        •
-                      </span>
-                      {p.isActive ? (
-                        <button
-                          onClick={() => handleDeactivate(p.id)}
-                          className="text-xs font-medium text-amber-600 dark:text-amber-400 hover:text-amber-500"
-                        >
-                          Deactivate
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleActivate(p.id)}
-                          className="text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-500"
-                        >
-                          Activate
-                        </button>
-                      )}
+                    <td>{fmt(p.minLoanAmount)} – {fmt(p.maxLoanAmount)}</td>
+                    <td>{p.interestRate}%</td>
+                    <td>{p.tenureMonths} mo</td>
+                    <td className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => navigate(`/products/${p.id}`)} className="text-xs font-medium text-primary-700 hover:underline">View</button>
+                        <span className="text-neutral-300">|</span>
+                        <button onClick={() => navigate(`/products/${p.id}/edit`)} className="text-xs font-medium text-neutral-600 hover:text-neutral-800">Edit</button>
+                        <span className="text-neutral-300">|</span>
+                        {p.isActive
+                          ? <button onClick={() => handleDeactivate(p.id)} className="text-xs font-medium text-amber-600 hover:text-amber-700">Deactivate</button>
+                          : <button onClick={() => handleActivate(p.id)} className="text-xs font-medium text-success hover:opacity-80">Activate</button>
+                        }
+                        <span className="text-neutral-300">|</span>
+                        <button onClick={() => setDeleteProductId(p.id)} className="text-xs font-medium text-danger hover:opacity-80">Delete</button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -241,7 +145,7 @@ export const ProductListPage = () => {
       <ConfirmDialog
         open={!!deleteProductId}
         title="Delete product"
-        message={`Are you sure you want to delete this product? This action cannot be undone.`}
+        message="Are you sure you want to delete this product? This action cannot be undone."
         confirmLabel="Delete"
         cancelLabel="Cancel"
         onCancel={() => setDeleteProductId(null)}

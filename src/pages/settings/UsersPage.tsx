@@ -1,46 +1,37 @@
 export const UsersPage = () => {
   const users = [
-    { id: 'U-001', name: 'Admin User', role: 'Admin' },
-    { id: 'U-002', name: 'Loan Officer 1', role: 'Loan Officer' },
-    { id: 'U-003', name: 'Ops User', role: 'Ops' },
+    { id: 'U-001', email: 'superadmin@testfsp.com', role: 'Super Admin', status: 'Active' },
+    { id: 'U-002', email: 'admin@testfsp.com', role: 'Admin', status: 'Active' },
+    { id: 'U-003', email: 'manager@testfsp.com', role: 'Manager', status: 'Active' },
+    { id: 'U-004', email: 'officer@testfsp.com', role: 'Loan Officer', status: 'Active' },
+    { id: 'U-005', email: 'user@testfsp.com', role: 'User', status: 'Active' },
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
-            Users & Roles
-          </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Lightweight view of FSP users and their roles for this module.
-          </p>
-        </div>
+    <div className="space-y-6">
+      <div className="page-header">
+        <h1 className="page-title">Users & Roles</h1>
+        <p className="page-subtitle">FSP portal users and their assigned roles.</p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60">
-        <table className="min-w-full text-left text-xs">
-          <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-700 dark:text-slate-400">
+      <div className="card overflow-hidden">
+        <table className="data-table">
+          <thead>
             <tr>
-              <th className="px-4 py-2 font-medium">User ID</th>
-              <th className="px-4 py-2 font-medium">Name</th>
-              <th className="px-4 py-2 font-medium">Role</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
             {users.map((u) => (
-              <tr
-                key={u.id}
-                className="border-t border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60"
-              >
-                <td className="px-4 py-2 text-slate-900 dark:text-slate-100">
-                  {u.id}
+              <tr key={u.id}>
+                <td className="font-medium text-neutral-800">{u.email}</td>
+                <td>
+                  <span className="badge badge-info">{u.role}</span>
                 </td>
-                <td className="px-4 py-2 text-slate-700 dark:text-slate-200">
-                  {u.name}
-                </td>
-                <td className="px-4 py-2 text-slate-700 dark:text-slate-200">
-                  {u.role}
+                <td>
+                  <span className="badge badge-success">{u.status}</span>
                 </td>
               </tr>
             ))}

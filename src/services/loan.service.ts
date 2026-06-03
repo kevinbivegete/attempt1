@@ -1,7 +1,9 @@
 import apiClient from './api';
 
 export type LoanStatus =
+    | 'Draft'
     | 'Pending'
+    | 'Submitted'
     | 'Approved'
     | 'Rejected'
     | 'Disbursed'

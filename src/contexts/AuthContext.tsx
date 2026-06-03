@@ -105,8 +105,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const normalizeRole = (r: string) =>
+    r.toLowerCase().replace(/[\s_-]+/g, '');
+
   const hasRole = (role: string): boolean => {
-    return user?.roles?.includes(role) ?? false;
+    const target = normalizeRole(role);
+    return user?.roles?.some((r) => normalizeRole(r) === target) ?? false;
   };
 
   const hasPermission = (permission: string): boolean => {

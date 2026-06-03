@@ -1,4 +1,4 @@
-import apiClient from './api';
+import { collectionApiClient as apiClient } from './api';
 
 export interface CollectionActivity {
   id: string;

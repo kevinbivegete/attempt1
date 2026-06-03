@@ -96,7 +96,7 @@ export const DisbursementFormPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-sm text-slate-600 dark:text-slate-400">
+        <div className="text-sm text-neutral-500">
           Loading disbursement form...
         </div>
       </div>
@@ -113,7 +113,7 @@ export const DisbursementFormPage = () => {
         )}
         <button
           onClick={() => navigate('/loans')}
-          className="rounded-md bg-primary-500 px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-primary-400"
+          className="btn-secondary"
         >
           Back to Loans
         </button>
@@ -125,10 +125,10 @@ export const DisbursementFormPage = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
+          <h1 className="page-title">
             Initiate Disbursement
           </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+          <p className="mt-1 text-sm text-neutral-500">
             Pre-filled with approved loan details. Capture channel and recipient
             information.
           </p>
@@ -137,17 +137,17 @@ export const DisbursementFormPage = () => {
 
       <form onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 space-y-3">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+          <div className="card p-5 space-y-4">
+            <h2 className="text-sm font-semibold text-neutral-800">
               Loan Summary
             </h2>
-            <dl className="grid gap-3 text-xs text-slate-700 dark:text-slate-200 sm:grid-cols-2">
+            <dl className="grid gap-3 text-xs text-neutral-800 sm:grid-cols-2">
               <div>
-                <dt className="text-slate-600 dark:text-slate-400">Loan #</dt>
+                <dt className="text-neutral-500">Loan #</dt>
                 <dd className="font-medium">{loan.loanNumber}</dd>
               </div>
               <div>
-                <dt className="text-slate-600 dark:text-slate-400">
+                <dt className="text-neutral-500">
                   Approved Amount
                 </dt>
                 <dd className="font-medium">
@@ -155,7 +155,7 @@ export const DisbursementFormPage = () => {
                 </dd>
               </div>
               <div>
-                <dt className="text-slate-600 dark:text-slate-400">
+                <dt className="text-neutral-500">
                   Total Disbursed
                 </dt>
                 <dd className="font-medium">
@@ -163,7 +163,7 @@ export const DisbursementFormPage = () => {
                 </dd>
               </div>
               <div>
-                <dt className="text-slate-600 dark:text-slate-400">
+                <dt className="text-neutral-500">
                   Remaining
                 </dt>
                 <dd className="font-medium">{formatCurrency(remaining)}</dd>
@@ -171,13 +171,13 @@ export const DisbursementFormPage = () => {
             </dl>
           </div>
 
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 space-y-3">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+          <div className="card p-5 space-y-4">
+            <h2 className="text-sm font-semibold text-neutral-800">
               Disbursement Details
             </h2>
             <div className="grid gap-3 md:grid-cols-2 text-xs">
               <div>
-                <label className="mb-1 block text-slate-700 dark:text-slate-300">
+                <label className="form-label">
                   Amount
                 </label>
                 <input
@@ -188,15 +188,15 @@ export const DisbursementFormPage = () => {
                       e.target.value === '' ? '' : Number(e.target.value),
                     )
                   }
-                  className="w-full rounded-md border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 px-2 py-1.5 text-xs text-slate-900 dark:text-slate-100"
+                  className="form-input"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-slate-700 dark:text-slate-300">
+                <label className="form-label">
                   Channel
                 </label>
                 <select
-                  className="w-full rounded-md border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 px-2 py-1.5 text-xs text-slate-900 dark:text-slate-100"
+                  className="form-input"
                   value={channel}
                   onChange={(e) => setChannel(e.target.value)}
                 >
@@ -208,25 +208,25 @@ export const DisbursementFormPage = () => {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-slate-700 dark:text-slate-300">
+                <label className="form-label">
                   Recipient Name
                 </label>
                 <input
                   type="text"
                   value={recipientName}
                   onChange={(e) => setRecipientName(e.target.value)}
-                  className="w-full rounded-md border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 px-2 py-1.5 text-xs text-slate-900 dark:text-slate-100"
+                  className="form-input"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-slate-700 dark:text-slate-300">
+                <label className="form-label">
                   Recipient Account / Wallet
                 </label>
                 <input
                   type="text"
                   value={recipientAccount}
                   onChange={(e) => setRecipientAccount(e.target.value)}
-                  className="w-full rounded-md border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 px-2 py-1.5 text-xs text-slate-900 dark:text-slate-100"
+                  className="form-input"
                 />
               </div>
             </div>
@@ -234,11 +234,11 @@ export const DisbursementFormPage = () => {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 space-y-3">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+          <div className="card p-5 space-y-4">
+            <h2 className="text-sm font-semibold text-neutral-800">
               Confirmation
             </h2>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
+            <p className="text-xs text-neutral-500">
               On save, this will call{' '}
               <code className="text-[11px] text-primary-600 dark:text-primary-300">
                 POST /disbursements
@@ -255,14 +255,14 @@ export const DisbursementFormPage = () => {
                 amount <= 0 ||
                 remaining <= 0
               }
-              className="flex-1 rounded-md bg-primary-500 px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-primary-400 disabled:opacity-50"
+              className="btn-primary flex-1 justify-center"
             >
               {submitting ? 'Creating...' : 'Create Disbursement'}
             </button>
             <button
               type="button"
               onClick={() => navigate(`/loans/${loan.id}`)}
-              className="flex-1 rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="btn-secondary flex-1 justify-center"
             >
               Cancel
             </button>

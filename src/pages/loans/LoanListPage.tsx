@@ -5,6 +5,23 @@ import { getErrorMessage } from '../../utils/errorHandler';
 
 type StatusFilter = 'All' | LoanStatus;
 
+const loanStatusBadge = (status: string) => {
+  const map: Record<string, string> = {
+    Draft: 'badge badge-neutral',
+    Submitted: 'badge badge-info',
+    Approved: 'badge badge-success',
+    Rejected: 'badge badge-danger',
+    Disbursed: 'badge badge-success',
+    Active: 'badge badge-success',
+    Pending: 'badge badge-warning',
+    Closed: 'badge badge-neutral',
+  };
+  return map[status] ?? 'badge badge-neutral';
+};
+
+const fmt = (n: number) =>
+  new Intl.NumberFormat('en-US', { minimumFractionDigits: 0 }).format(n);
+
 export const LoanListPage = () => {
   const navigate = useNavigate();
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -31,49 +48,35 @@ export const LoanListPage = () => {
         setLoading(false);
       }
     };
-
     loadLoans();
   }, [statusFilter, customerFilter, productFilter]);
 
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-
-  const formatDate = (iso: string) =>
-    new Date(iso).toISOString().slice(0, 10);
-
-  const filteredLoans = loans;
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
-            Loan Applications
-          </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Capture new applications, monitor status, and route items for
-            approval.
-          </p>
+        <div className="page-header mb-0">
+          <h1 className="page-title">Loan Applications</h1>
+          <p className="page-subtitle">Capture new applications, monitor status, and route for approval.</p>
         </div>
-        <button
-          onClick={() => navigate('/loans/new')}
-          className="rounded-md bg-primary-500 px-3 py-2 text-sm font-medium text-slate-950 hover:bg-primary-400"
-        >
+        <button onClick={() => navigate('/loans/new')} className="btn-primary">
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
           New Application
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2 text-xs text-slate-700 dark:text-slate-300">
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-          className="rounded-md border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 py-1 text-slate-900 dark:text-slate-100"
+          className="form-select w-40"
         >
-          <option value="All">Status: All</option>
+          <option value="All">All Status</option>
           <option value="Pending">Pending</option>
+          <option value="Submitted">Submitted</option>
           <option value="Approved">Approved</option>
           <option value="Rejected">Rejected</option>
           <option value="Disbursed">Disbursed</option>
@@ -81,88 +84,70 @@ export const LoanListPage = () => {
         </select>
         <input
           type="text"
-          placeholder="Customer ID"
+          placeholder="Customer ID..."
           value={customerFilter}
           onChange={(e) => setCustomerFilter(e.target.value)}
-          className="w-36 rounded-md border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 py-1 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-500"
+          className="form-input w-44"
         />
         <input
           type="text"
-          placeholder="Product code"
+          placeholder="Product code..."
           value={productFilter}
           onChange={(e) => setProductFilter(e.target.value)}
-          className="w-36 rounded-md border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 py-1 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-500"
+          className="form-input w-44"
         />
+        <span className="text-xs text-neutral-400">{loans.length} applications</span>
       </div>
 
       {error && (
-        <div className="rounded-md bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 px-3 py-2 text-xs text-rose-700 dark:text-rose-300">
-          {error}
-        </div>
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60">
-        {loading ? (
-          <div className="flex items-center justify-center py-8 text-xs text-slate-600 dark:text-slate-400">
-            Loading loans...
-          </div>
-        ) : filteredLoans.length === 0 ? (
-          <div className="px-4 py-8 text-center text-xs text-slate-600 dark:text-slate-400">
-            No loan applications found
-          </div>
-        ) : (
-          <table className="min-w-full text-left text-xs">
-            <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-700 dark:text-slate-400">
-              <tr>
-                <th className="px-4 py-2 font-medium">Loan #</th>
-                <th className="px-4 py-2 font-medium">Customer</th>
-                <th className="px-4 py-2 font-medium">Product ID</th>
-                <th className="px-4 py-2 font-medium">Amount</th>
-                <th className="px-4 py-2 font-medium">Status</th>
-                <th className="px-4 py-2 font-medium">Created</th>
-                <th className="px-4 py-2 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredLoans.map((l) => (
-                <tr
-                  key={l.id}
-                  className="border-t border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60"
-                >
-                  <td className="px-4 py-2 text-slate-900 dark:text-slate-100">
-                    {l.loanNumber}
-                  </td>
-                  <td className="px-4 py-2 text-slate-700 dark:text-slate-200">
-                    {l.customerId}
-                  </td>
-                  <td className="px-4 py-2 text-slate-700 dark:text-slate-200">
-                    {l.loanProductId}
-                  </td>
-                  <td className="px-4 py-2 text-slate-700 dark:text-slate-200">
-                    {formatCurrency(l.requestedAmount)}
-                  </td>
-                  <td className="px-4 py-2">
-                    <span className="inline-flex rounded-full bg-amber-100 dark:bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:text-amber-300">
-                      {l.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2 text-slate-600 dark:text-slate-300">
-                    {formatDate(l.createdAt)}
-                  </td>
-                  <td className="px-4 py-2 text-right">
-                    <button
-                      onClick={() => navigate(`/loans/${l.id}`)}
-                      className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300"
-                    >
-                      View
-                    </button>
-                  </td>
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <div className="text-sm text-neutral-400">Loading applications...</div>
+        </div>
+      ) : (
+        <div className="card overflow-hidden">
+          {loans.length === 0 ? (
+            <div className="py-16 text-center text-sm text-neutral-400">No loan applications found</div>
+          ) : (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Loan #</th>
+                  <th>Customer ID</th>
+                  <th>Product</th>
+                  <th>Amount (RWF)</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th className="text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+              </thead>
+              <tbody>
+                {loans.map((l) => (
+                  <tr key={l.id}>
+                    <td className="font-medium text-neutral-800">{l.loanNumber}</td>
+                    <td className="font-mono text-xs text-neutral-500">{l.customerId.slice(0, 8)}…</td>
+                    <td className="font-mono text-xs text-neutral-500">{l.loanProductId.slice(0, 8)}…</td>
+                    <td>{fmt(l.requestedAmount)}</td>
+                    <td><span className={loanStatusBadge(l.status)}>{l.status}</span></td>
+                    <td>{new Date(l.createdAt).toLocaleDateString()}</td>
+                    <td className="text-right">
+                      <button
+                        onClick={() => navigate(`/loans/${l.id}`)}
+                        className="text-xs font-medium text-primary-700 hover:underline"
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -11,10 +11,13 @@ const PRODUCTS_BASE_URL = 'http://localhost:3000/api/v1';
 // Auth backend (port 3001)
 const AUTH_BASE_URL = 'http://localhost:3001/api/v1';
 
-// FSP Customer Service API (port 3004)
+// FSP Customer Service API (port 8002)
 const CUSTOMER_BASE_URL =
   import.meta.env.VITE_CUSTOMER_SERVICE_URL ||
-  'http://localhost:3004/api/v1';
+  'http://localhost:8002';
+
+// Collections & Recovery API (port 3008)
+const COLLECTIONS_BASE_URL = 'http://localhost:3008/api/v1';
 
 // API client for products, origination, disbursement endpoints
 export const apiClient = axios.create({
@@ -27,6 +30,14 @@ export const apiClient = axios.create({
 // API client for customer registry
 export const customerApiClient = axios.create({
   baseURL: CUSTOMER_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// API client for collections & recovery
+export const collectionApiClient = axios.create({
+  baseURL: COLLECTIONS_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -172,5 +183,8 @@ attach401Refresh(apiClient);
 
 attachAuthBearer(customerApiClient);
 attach401Refresh(customerApiClient);
+
+attachAuthBearer(collectionApiClient);
+attach401Refresh(collectionApiClient);
 
 export default apiClient;

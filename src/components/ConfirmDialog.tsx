@@ -22,25 +22,15 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/60">
-      <div className="w-full max-w-sm rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 shadow-xl">
-        <div className="mb-2">
-          <h2 className="text-sm font-semibold text-slate-100">{title}</h2>
-        </div>
-        <p className="mb-4 text-xs text-slate-300">{message}</p>
-        <div className="flex justify-end gap-2 text-xs">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-md border border-slate-600 px-3 py-1 text-slate-200 hover:bg-slate-800"
-          >
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-neutral-800/40">
+      <div className="card w-full max-w-sm p-6 shadow-xl">
+        <h2 className="text-sm font-semibold text-neutral-800">{title}</h2>
+        <p className="mt-2 mb-5 text-sm text-neutral-500">{message}</p>
+        <div className="flex justify-end gap-3">
+          <button type="button" onClick={onCancel} className="btn-secondary">
             {cancelLabel}
           </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="rounded-md bg-rose-500 px-3 py-1 font-medium text-slate-950 hover:bg-rose-400"
-          >
+          <button type="button" onClick={onConfirm} className="btn-danger">
             {confirmLabel}
           </button>
         </div>
@@ -48,4 +38,3 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     </div>
   );
 };
-

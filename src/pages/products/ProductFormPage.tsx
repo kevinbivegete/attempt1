@@ -166,59 +166,44 @@ export const ProductFormPage = ({ mode }: ProductFormPageProps) => {
   };
 
   const inputClass = (name: string) =>
-    `w-full rounded-md border ${
-      fieldErrors[name]
-        ? 'border-rose-500 dark:border-rose-500'
-        : 'border-slate-300 dark:border-slate-800'
-    } bg-white dark:bg-slate-950 px-2 py-1.5 text-xs text-slate-900 dark:text-slate-100`;
-  const baseInputClass =
-    'w-full rounded-md border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 px-2 py-1.5 text-xs text-slate-900 dark:text-slate-100';
-  const labelClass = 'mb-1 block text-slate-700 dark:text-slate-300';
-  const cardClass =
-    'rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 space-y-3';
+    `form-input ${fieldErrors[name] ? 'border-danger ring-2 ring-rose-100' : ''}`;
+  const baseInputClass = 'form-input';
+  const labelClass = 'form-label';
+  const cardClass = 'card p-5 space-y-4';
 
   if (loadingData) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-sm text-slate-600 dark:text-slate-400">
-          Loading product...
-        </div>
+      <div className="flex items-center justify-center py-16">
+        <div className="text-sm text-neutral-400">Loading product...</div>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
-            {isEdit ? 'Edit Product' : 'Create Product'}
-          </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Define core product parameters, fees, eligibility rules, and
-            approval workflow.
-          </p>
-        </div>
+      <div className="page-header mb-0">
+        <h1 className="page-title">{isEdit ? 'Edit Product' : 'Create Product'}</h1>
+        <p className="page-subtitle">Define core parameters, fees, eligibility rules, and approval workflow.</p>
       </div>
 
       {/* Stepper */}
-      <div className="flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-2">
+      <div className="flex items-center gap-1 rounded-xl border border-neutral-300 bg-white p-2">
         {STEPS.map((step, idx) => (
           <div key={step.id} className="flex flex-1 items-center">
             <button
               type="button"
               onClick={() => setCurrentStep(step.id)}
-              className={`flex flex-1 items-center justify-center gap-2 rounded-md px-2 py-2 text-xs font-medium transition-colors ${
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-2 py-2 text-xs font-medium transition-colors ${
                 currentStep === step.id
-                  ? 'bg-primary-500/20 text-primary-600 dark:text-primary-400'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-primary-200 text-primary-700'
+                  : 'text-neutral-500 hover:bg-primary-100 hover:text-primary-700'
               }`}
             >
               <span
-                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs ${
+                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                   currentStep === step.id
-                    ? 'bg-primary-500 text-slate-950'
-                    : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                    ? 'bg-primary-700 text-white'
+                    : 'bg-neutral-200 text-neutral-600'
                 }`}
               >
                 {step.id}
@@ -226,16 +211,14 @@ export const ProductFormPage = ({ mode }: ProductFormPageProps) => {
               <span className="hidden sm:inline">{step.label}</span>
             </button>
             {idx < STEPS.length - 1 && (
-              <div className="h-px w-2 flex-shrink-0 bg-slate-200 dark:bg-slate-700 sm:w-4" />
+              <div className="h-px w-2 flex-shrink-0 bg-neutral-300 sm:w-4" />
             )}
           </div>
         ))}
       </div>
 
       {error && (
-        <div className="rounded-md border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/20 px-3 py-2 text-xs text-rose-700 dark:text-rose-300">
-          {error}
-        </div>
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -447,7 +430,7 @@ export const ProductFormPage = ({ mode }: ProductFormPageProps) => {
           <button
             type="button"
             onClick={() => navigate('/products')}
-            className="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="btn-secondary"
           >
             Cancel
           </button>
@@ -456,7 +439,7 @@ export const ProductFormPage = ({ mode }: ProductFormPageProps) => {
               <button
                 type="button"
                 onClick={() => setCurrentStep((s) => s - 1)}
-                className="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="btn-secondary"
               >
                 Previous
               </button>
@@ -466,7 +449,7 @@ export const ProductFormPage = ({ mode }: ProductFormPageProps) => {
                 type="button"
                 onClick={() => canProceed() && setCurrentStep((s) => s + 1)}
                 disabled={!canProceed()}
-                className="rounded-md bg-primary-500 px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-primary-400 disabled:cursor-not-allowed disabled:opacity-50"
+                className="btn-primary"
               >
                 Next
               </button>
@@ -474,7 +457,7 @@ export const ProductFormPage = ({ mode }: ProductFormPageProps) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-md bg-primary-500 px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-primary-400 disabled:cursor-not-allowed disabled:opacity-50"
+                className="btn-primary"
               >
                 {loading
                   ? 'Saving...'
@@ -558,7 +541,7 @@ function Step2FeesAndAccounts({
             {fees.map((f, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between gap-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/80 px-3 py-2 text-xs"
+                className="flex items-center justify-between gap-2 rounded-lg border border-neutral-300 bg-neutral-100 px-3 py-2 text-xs"
               >
                 <div>
                   <span className="font-medium text-slate-800 dark:text-slate-200">
@@ -585,7 +568,7 @@ function Step2FeesAndAccounts({
           </div>
         )}
         {showFeeForm ? (
-          <div className="space-y-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/80 p-3">
+          <div className="space-y-3 rounded-xl border border-neutral-300 bg-neutral-100 p-4">
             <div className="grid gap-2 sm:grid-cols-2">
               <div>
                 <label className={labelClass}>Fee Type</label>
@@ -672,14 +655,14 @@ function Step2FeesAndAccounts({
               <button
                 type="button"
                 onClick={addFee}
-                className="rounded-md bg-primary-500 px-3 py-1.5 text-xs font-medium text-slate-950 hover:bg-primary-400"
+                className="btn-primary"
               >
                 Add Fee
               </button>
               <button
                 type="button"
                 onClick={() => setShowFeeForm(false)}
-                className="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="btn-secondary"
               >
                 Cancel
               </button>
@@ -785,7 +768,7 @@ function Step3EligibilityRules({
           {rules.map((r, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-between gap-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/80 px-3 py-2 text-xs"
+              className="flex items-center justify-between gap-2 rounded-lg border border-neutral-300 bg-neutral-100 px-3 py-2 text-xs"
             >
               <div>
                 <span className="font-medium text-slate-800 dark:text-slate-200">
@@ -807,7 +790,7 @@ function Step3EligibilityRules({
         </div>
       )}
       {showRuleForm ? (
-        <div className="space-y-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/80 p-3">
+        <div className="space-y-3 rounded-xl border border-neutral-300 bg-neutral-100 p-4">
           <div className="grid gap-2 sm:grid-cols-2">
             <div>
               <label className={labelClass}>Rule Name *</label>
@@ -869,14 +852,14 @@ function Step3EligibilityRules({
             <button
               type="button"
               onClick={addRule}
-              className="rounded-md bg-primary-500 px-3 py-1.5 text-xs font-medium text-slate-950 hover:bg-primary-400"
+              className="btn-primary"
             >
               Add Rule
             </button>
             <button
               type="button"
               onClick={() => setShowRuleForm(false)}
-              className="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="btn-secondary"
             >
               Cancel
             </button>
@@ -954,7 +937,7 @@ function Step4ApprovalWorkflow({
           {workflows.map((w, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-between gap-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/80 px-3 py-2 text-xs"
+              className="flex items-center justify-between gap-2 rounded-lg border border-neutral-300 bg-neutral-100 px-3 py-2 text-xs"
             >
               <div>
                 <span className="font-medium text-slate-800 dark:text-slate-200">
@@ -979,7 +962,7 @@ function Step4ApprovalWorkflow({
         </div>
       )}
       {showWorkflowForm ? (
-        <div className="space-y-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/80 p-3">
+        <div className="space-y-3 rounded-xl border border-neutral-300 bg-neutral-100 p-4">
           <div className="grid gap-2 sm:grid-cols-2">
             <div>
               <label className={labelClass}>Min Amount</label>
@@ -1048,14 +1031,14 @@ function Step4ApprovalWorkflow({
             <button
               type="button"
               onClick={addWorkflow}
-              className="rounded-md bg-primary-500 px-3 py-1.5 text-xs font-medium text-slate-950 hover:bg-primary-400"
+              className="btn-primary"
             >
               Add Step
             </button>
             <button
               type="button"
               onClick={() => setShowWorkflowForm(false)}
-              className="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="btn-secondary"
             >
               Cancel
             </button>

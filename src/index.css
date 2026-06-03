@@ -1,7 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-slate-950 text-slate-50 antialiased;
+@layer base {
+  body {
+    @apply bg-primary-100 text-neutral-800 antialiased font-sans;
+    font-size: 12px;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d4d4d8; }
+  ::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+}
+
+@layer components {
+
+  /* ── Buttons ── */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white shadow-purple transition-all hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed;
+    background: linear-gradient(135deg, #893027 0%, #e0822d 100%);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 border border-neutral-300 bg-white px-4 py-2 text-xs font-semibold text-neutral-700 transition-all hover:bg-neutral-100 hover:text-neutral-800 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-neutral-600 transition-all hover:bg-neutral-200 hover:text-neutral-800 active:scale-95;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center gap-2 bg-danger px-4 py-2 text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  /* ── Card ── */
+  .card {
+    @apply border border-neutral-300 bg-white shadow-card;
+  }
+
+  /* ── Forms ── */
+  .form-input {
+    @apply w-full border border-neutral-300 bg-white px-3 py-2 text-xs text-neutral-800 placeholder:text-neutral-400 shadow-input transition focus:border-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-200 disabled:opacity-40 disabled:bg-neutral-100;
+  }
+
+  .form-select {
+    @apply form-input appearance-none;
+  }
+
+  .form-label {
+    @apply mb-1 block text-[10px] font-semibold uppercase tracking-[0.4px] text-neutral-500;
+  }
+
+  /* ── Table ── */
+  .data-table {
+    @apply min-w-full text-left text-xs;
+  }
+  .data-table thead tr {
+    @apply bg-neutral-100;
+  }
+  .data-table thead th {
+    @apply px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.5px] text-neutral-500;
+  }
+  .data-table tbody tr {
+    @apply border-t border-neutral-300 transition hover:bg-neutral-100;
+  }
+  .data-table tbody td {
+    @apply px-4 py-3 text-xs text-neutral-700;
+  }
+
+  /* ── Badges ── */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 text-[10px] font-medium;
+  }
+  .badge-success {
+    @apply badge bg-emerald-50 text-emerald-700;
+  }
+  .badge-warning {
+    @apply badge bg-amber-50 text-amber-700;
+  }
+  .badge-danger {
+    @apply badge bg-rose-50 text-rose-700;
+  }
+  .badge-info {
+    @apply badge bg-orange-50 text-orange-700;
+  }
+  .badge-neutral {
+    @apply badge bg-neutral-200 text-neutral-600;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    @apply mb-6;
+  }
+  .page-title {
+    @apply text-base font-semibold text-neutral-800;
+  }
+  .page-subtitle {
+    @apply mt-1 text-[10px] text-neutral-500;
+  }
+
+  /* ── Stat card ── */
+  .stat-card {
+    @apply card p-5 flex flex-col gap-2;
+  }
 }

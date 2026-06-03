@@ -4,6 +4,9 @@ import { productService, Product } from '../../services/product.service';
 import { getErrorMessage } from '../../utils/errorHandler';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 
+const fmt = (n: number) =>
+  new Intl.NumberFormat('en-US', { minimumFractionDigits: 0 }).format(n);
+
 export const ProductDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -14,11 +17,7 @@ export const ProductDetailPage = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  useEffect(() => {
-    if (id) {
-      loadProduct();
-    }
-  }, [id]);
+  useEffect(() => { if (id) loadProduct(); }, [id]);
 
   const loadProduct = async () => {
     if (!id) return;
@@ -36,56 +35,29 @@ export const ProductDetailPage = () => {
 
   const handleActivate = async () => {
     if (!id) return;
-    try {
-      setActionLoading(true);
-      await productService.activate(id);
-      await loadProduct();
-    } catch (err: any) {
-      alert(getErrorMessage(err));
-    } finally {
-      setActionLoading(false);
-    }
+    try { setActionLoading(true); await productService.activate(id); await loadProduct(); }
+    catch (err: any) { alert(getErrorMessage(err)); }
+    finally { setActionLoading(false); }
   };
 
   const handleDeactivate = async () => {
     if (!id) return;
-    try {
-      setActionLoading(true);
-      await productService.deactivate(id);
-      await loadProduct();
-    } catch (err: any) {
-      alert(getErrorMessage(err));
-    } finally {
-      setActionLoading(false);
-    }
+    try { setActionLoading(true); await productService.deactivate(id); await loadProduct(); }
+    catch (err: any) { alert(getErrorMessage(err)); }
+    finally { setActionLoading(false); }
   };
 
   const handleDelete = async () => {
     if (!id) return;
-    try {
-      setDeleteLoading(true);
-      await productService.delete(id);
-      navigate('/products');
-    } catch (err: any) {
-      alert(getErrorMessage(err));
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
+    try { setDeleteLoading(true); await productService.delete(id); navigate('/products'); }
+    catch (err: any) { alert(getErrorMessage(err)); }
+    finally { setDeleteLoading(false); }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-sm text-slate-600 dark:text-slate-400">
-          Loading product...
-        </div>
+      <div className="flex items-center justify-center py-16">
+        <div className="text-sm text-neutral-400">Loading product...</div>
       </div>
     );
   }
@@ -93,13 +65,10 @@ export const ProductDetailPage = () => {
   if (error || !product) {
     return (
       <div className="space-y-4">
-        <div className="rounded-md bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 px-3 py-2 text-xs text-rose-700 dark:text-rose-300">
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {error || 'Product not found'}
         </div>
-        <button
-          onClick={() => navigate('/products')}
-          className="rounded-md bg-primary-500 px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-primary-400"
-        >
+        <button onClick={() => navigate('/products')} className="btn-secondary">
           Back to Products
         </button>
       </div>
@@ -107,156 +76,77 @@ export const ProductDetailPage = () => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
-            {product.productName}
-          </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Product {product.productCode} •{' '}
-            {product.isActive ? 'Active' : 'Inactive'}
+          <h1 className="page-title">{product.productName}</h1>
+          <p className="page-subtitle">
+            Code: {product.productCode} ·{' '}
+            <span className={product.isActive ? 'text-success' : 'text-neutral-400'}>
+              {product.isActive ? 'Active' : 'Inactive'}
+            </span>
           </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => navigate(`/products/${product.id}/edit`)}
-            className="rounded-md bg-primary-500 px-3 py-2 text-xs font-medium text-slate-950 hover:bg-primary-400"
-          >
-            Edit Product
-          </button>
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            disabled={deleteLoading}
-            className="rounded-md border border-rose-300 dark:border-rose-700 px-3 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 disabled:opacity-50"
-          >
-            {deleteLoading ? 'Deleting...' : 'Delete'}
+        <div className="flex flex-wrap items-center gap-2">
+          <button onClick={() => navigate(`/products/${product.id}/edit`)} className="btn-secondary">
+            Edit
           </button>
           {product.isActive ? (
-            <button
-              onClick={handleDeactivate}
-              disabled={actionLoading}
-              className="rounded-md border border-amber-300 dark:border-amber-700 px-3 py-2 text-xs font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 disabled:opacity-50"
-            >
+            <button onClick={handleDeactivate} disabled={actionLoading} className="btn-ghost text-amber-600 hover:text-amber-700">
               {actionLoading ? 'Deactivating...' : 'Deactivate'}
             </button>
           ) : (
-            <button
-              onClick={handleActivate}
-              disabled={actionLoading}
-              className="rounded-md border border-emerald-300 dark:border-emerald-700 px-3 py-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 disabled:opacity-50"
-            >
+            <button onClick={handleActivate} disabled={actionLoading} className="btn-ghost text-success">
               {actionLoading ? 'Activating...' : 'Activate'}
             </button>
           )}
+          <button onClick={() => setShowDeleteConfirm(true)} disabled={deleteLoading} className="btn-danger">
+            {deleteLoading ? 'Deleting...' : 'Delete'}
+          </button>
         </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
-            <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Core Information
-            </h2>
-            <dl className="grid gap-3 text-xs text-slate-700 dark:text-slate-200 sm:grid-cols-2">
-              <div>
-                <dt className="text-slate-500 dark:text-slate-400">
-                  Product Code
-                </dt>
-                <dd className="font-medium">{product.productCode}</dd>
-              </div>
-              <div>
-                <dt className="text-slate-500 dark:text-slate-400">Name</dt>
-                <dd className="font-medium">{product.productName}</dd>
-              </div>
+          {/* Core Info */}
+          <div className="card p-5">
+            <h2 className="mb-4 text-sm font-semibold text-neutral-800">Core Information</h2>
+            <dl className="grid gap-4 sm:grid-cols-2 text-sm">
+              {[
+                { label: 'Product Code', value: product.productCode, mono: true },
+                { label: 'Product Name', value: product.productName },
+                { label: 'Min / Max Amount (RWF)', value: `${fmt(product.minLoanAmount)} – ${fmt(product.maxLoanAmount)}` },
+                { label: 'Interest Rate', value: `${product.interestRate}% ${product.interestRateType}` },
+                { label: 'Tenure', value: `${product.tenureMonths} months` },
+                { label: 'Repayment Schedule', value: product.repaymentScheduleType },
+                { label: 'Requires Collateral', value: product.requiresCollateral ? 'Yes' : 'No' },
+                ...(product.defaultDisbursementAccount ? [{ label: 'Disbursement Account', value: product.defaultDisbursementAccount }] : []),
+                ...(product.defaultGLAccount ? [{ label: 'Default GL Account', value: product.defaultGLAccount }] : []),
+              ].map(({ label, value, mono }) => (
+                <div key={label}>
+                  <dt className="text-xs text-neutral-500 mb-1">{label}</dt>
+                  <dd className={`font-medium text-neutral-800 ${mono ? 'font-mono text-xs' : ''}`}>{value}</dd>
+                </div>
+              ))}
               {product.description && (
                 <div className="sm:col-span-2">
-                  <dt className="text-slate-500 dark:text-slate-400">
-                    Description
-                  </dt>
-                  <dd className="mt-1">{product.description}</dd>
-                </div>
-              )}
-              <div>
-                <dt className="text-slate-500 dark:text-slate-400">
-                  Min / Max Amount
-                </dt>
-                <dd className="font-medium">
-                  {formatCurrency(product.minLoanAmount)} –{' '}
-                  {formatCurrency(product.maxLoanAmount)}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-slate-500 dark:text-slate-400">
-                  Interest Rate
-                </dt>
-                <dd className="font-medium">
-                  {product.interestRate}% {product.interestRateType}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-slate-500 dark:text-slate-400">Tenure</dt>
-                <dd className="font-medium">{product.tenureMonths} months</dd>
-              </div>
-              <div>
-                <dt className="text-slate-500 dark:text-slate-400">
-                  Repayment Schedule
-                </dt>
-                <dd className="font-medium">{product.repaymentScheduleType}</dd>
-              </div>
-              <div>
-                <dt className="text-slate-500 dark:text-slate-400">
-                  Requires Collateral
-                </dt>
-                <dd className="font-medium">
-                  {product.requiresCollateral ? 'Yes' : 'No'}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-slate-500 dark:text-slate-400">Status</dt>
-                <dd>
-                  <span
-                    className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                      product.isActive
-                        ? 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400'
-                    }`}
-                  >
-                    {product.isActive ? 'Active' : 'Inactive'}
-                  </span>
-                </dd>
-              </div>
-              {product.defaultDisbursementAccount && (
-                <div>
-                  <dt className="text-slate-500 dark:text-slate-400">
-                    Default Disbursement Account
-                  </dt>
-                  <dd className="font-medium">
-                    {product.defaultDisbursementAccount}
-                  </dd>
-                </div>
-              )}
-              {product.defaultGLAccount && (
-                <div>
-                  <dt className="text-slate-500 dark:text-slate-400">
-                    Default GL Account
-                  </dt>
-                  <dd className="font-medium">{product.defaultGLAccount}</dd>
+                  <dt className="text-xs text-neutral-500 mb-1">Description</dt>
+                  <dd className="text-neutral-700">{product.description}</dd>
                 </div>
               )}
             </dl>
           </div>
 
+          {/* Eligibility Rules */}
           {product.eligibilityRules && product.eligibilityRules.length > 0 && (
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
-              <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                Eligibility Rules
-              </h2>
-              <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-200">
+            <div className="card p-5">
+              <h2 className="mb-3 text-sm font-semibold text-neutral-800">Eligibility Rules</h2>
+              <ul className="space-y-2">
                 {product.eligibilityRules.map((rule) => (
-                  <li key={rule.id}>
-                    • {rule.ruleName}: {rule.ruleType} {rule.operator}{' '}
-                    {rule.value}
+                  <li key={rule.id} className="flex items-center gap-2 text-sm text-neutral-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary-700 flex-shrink-0" />
+                    {rule.ruleName}: {rule.ruleType} {rule.operator} {rule.value}
                   </li>
                 ))}
               </ul>
@@ -265,46 +155,38 @@ export const ProductDetailPage = () => {
         </div>
 
         <div className="space-y-4">
+          {/* Fees */}
           {product.fees && product.fees.length > 0 && (
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
-              <h2 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                Fees
-              </h2>
-              <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-200">
+            <div className="card p-5">
+              <h2 className="mb-3 text-sm font-semibold text-neutral-800">Fees</h2>
+              <ul className="space-y-2">
                 {product.fees.map((fee) => (
-                  <li key={fee.id}>
-                    <div className="flex items-center justify-between">
-                      <span>{fee.feeName}</span>
-                      <span className="font-medium">
-                        {fee.isPercentage
-                          ? `${fee.feePercentage}%`
-                          : formatCurrency(fee.feeAmount || 0)}
-                      </span>
-                    </div>
+                  <li key={fee.id} className="flex items-center justify-between text-sm text-neutral-700">
+                    <span>{fee.feeName}</span>
+                    <span className="font-semibold text-neutral-800">
+                      {fee.isPercentage ? `${fee.feePercentage}%` : `${fmt(fee.feeAmount || 0)} RWF`}
+                    </span>
                   </li>
                 ))}
               </ul>
             </div>
           )}
 
-          {product.approvalWorkflows &&
-            product.approvalWorkflows.length > 0 && (
-              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
-                <h2 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  Approval Workflow
-                </h2>
-                <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-200">
-                  {product.approvalWorkflows.map((workflow) => (
-                    <li key={workflow.id}>
-                      • {workflow.approverRole}:{' '}
-                      {formatCurrency(workflow.minAmount)} –{' '}
-                      {formatCurrency(workflow.maxAmount)} (Level{' '}
-                      {workflow.approvalLevel})
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          {/* Approval Workflow */}
+          {product.approvalWorkflows && product.approvalWorkflows.length > 0 && (
+            <div className="card p-5">
+              <h2 className="mb-3 text-sm font-semibold text-neutral-800">Approval Workflow</h2>
+              <ul className="space-y-2">
+                {product.approvalWorkflows.map((w) => (
+                  <li key={w.id} className="text-sm text-neutral-700">
+                    <span className="font-medium">{w.approverRole}</span>
+                    <span className="text-neutral-500"> · Level {w.approvalLevel}</span>
+                    <div className="text-xs text-neutral-500">{fmt(w.minAmount)} – {fmt(w.maxAmount)} RWF</div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 
@@ -315,10 +197,7 @@ export const ProductDetailPage = () => {
         confirmLabel="Delete"
         cancelLabel="Cancel"
         onCancel={() => setShowDeleteConfirm(false)}
-        onConfirm={async () => {
-          await handleDelete();
-          setShowDeleteConfirm(false);
-        }}
+        onConfirm={async () => { await handleDelete(); setShowDeleteConfirm(false); }}
       />
     </div>
   );

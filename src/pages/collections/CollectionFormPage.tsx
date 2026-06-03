@@ -44,39 +44,39 @@ export const CollectionFormPage = () => {
   return (
     <div className="mx-auto max-w-lg space-y-4">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
+        <h1 className="page-title">
           Open collection case
         </h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-1 page-subtitle">
           For loans in <strong>Disbursed</strong> or <strong>Active</strong>{' '}
           status. One active workflow per loan.
         </p>
       </div>
 
       {error && (
-        <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700 dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-300">
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {error}
         </div>
       )}
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/60"
+        className="card p-5 space-y-4"
       >
         <div className="text-xs">
-          <label className="mb-1 block text-slate-700 dark:text-slate-300">
+          <label className="form-label">
             Loan ID
           </label>
           <input
             value={loanId}
             onChange={(e) => setLoanId(e.target.value)}
-            className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 dark:border-slate-800 dark:bg-slate-950"
+            className="form-input"
             placeholder="UUID"
           />
         </div>
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div>
-            <label className="mb-1 block text-slate-700 dark:text-slate-300">
+            <label className="form-label">
               Overdue amount
             </label>
             <input
@@ -86,11 +86,11 @@ export const CollectionFormPage = () => {
               onChange={(e) =>
                 setOverdueAmount(e.target.value === '' ? '' : Number(e.target.value))
               }
-              className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 dark:border-slate-800 dark:bg-slate-950"
+              className="form-input"
             />
           </div>
           <div>
-            <label className="mb-1 block text-slate-700 dark:text-slate-300">
+            <label className="form-label">
               Days past due
             </label>
             <input
@@ -100,18 +100,18 @@ export const CollectionFormPage = () => {
               onChange={(e) =>
                 setDaysPastDue(e.target.value === '' ? '' : Number(e.target.value))
               }
-              className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 dark:border-slate-800 dark:bg-slate-950"
+              className="form-input"
             />
           </div>
         </div>
         <div className="text-xs">
-          <label className="mb-1 block text-slate-700 dark:text-slate-300">
+          <label className="form-label">
             Priority
           </label>
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
-            className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 dark:border-slate-800 dark:bg-slate-950"
+            className="form-input"
           >
             <option value="Low">Low</option>
             <option value="Normal">Normal</option>
@@ -119,49 +119,49 @@ export const CollectionFormPage = () => {
           </select>
         </div>
         <div className="text-xs">
-          <label className="mb-1 block text-slate-700 dark:text-slate-300">
+          <label className="form-label">
             Original due date (optional)
           </label>
           <input
             type="date"
             value={originalDueDate}
             onChange={(e) => setOriginalDueDate(e.target.value)}
-            className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 dark:border-slate-800 dark:bg-slate-950"
+            className="form-input"
           />
         </div>
         <div className="text-xs">
-          <label className="mb-1 block text-slate-700 dark:text-slate-300">
+          <label className="form-label">
             Assigned to (optional)
           </label>
           <input
             value={assignedTo}
             onChange={(e) => setAssignedTo(e.target.value)}
-            className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 dark:border-slate-800 dark:bg-slate-950"
+            className="form-input"
           />
         </div>
         <div className="text-xs">
-          <label className="mb-1 block text-slate-700 dark:text-slate-300">
+          <label className="form-label">
             Notes
           </label>
           <textarea
             rows={3}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 dark:border-slate-800 dark:bg-slate-950"
+            className="form-input"
           />
         </div>
         <div className="flex gap-2 pt-2">
           <button
             type="submit"
             disabled={submitting}
-            className="flex-1 rounded-md bg-primary-500 py-2 text-xs font-semibold text-slate-950 hover:bg-primary-400 disabled:opacity-50"
+            className="btn-primary flex-1 justify-center"
           >
             {submitting ? 'Creating…' : 'Create case'}
           </button>
           <button
             type="button"
             onClick={() => navigate('/collections')}
-            className="flex-1 rounded-md border border-slate-300 py-2 text-xs dark:border-slate-700"
+            className="btn-secondary flex-1 justify-center"
           >
             Cancel
           </button>

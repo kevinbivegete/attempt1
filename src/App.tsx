@@ -16,27 +16,41 @@ import { DisbursementDetailPage } from './pages/disbursements/DisbursementDetail
 import { CollectionListPage } from './pages/collections/CollectionListPage';
 import { CollectionFormPage } from './pages/collections/CollectionFormPage';
 import { CollectionDetailPage } from './pages/collections/CollectionDetailPage';
+import { CustomerListPage } from './pages/customers/CustomerListPage';
+import { CustomerDetailPage } from './pages/customers/CustomerDetailPage';
+import { IndividualCustomerFormPage } from './pages/customers/IndividualCustomerFormPage';
+import { BusinessCustomerFormPage } from './pages/customers/BusinessCustomerFormPage';
+import { BusinessCustomerDetailPage } from './pages/customers/BusinessCustomerDetailPage';
 import { UsersPage } from './pages/settings/UsersPage';
 import { FspSettingsPage } from './pages/settings/FspSettingsPage';
+import { AnalyticsPage } from './pages/analytics/AnalyticsPage';
+import { RecoveryPage } from './pages/recovery/RecoveryPage';
 import { useAuth } from './contexts/AuthContext';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth();
-
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="text-sm text-slate-600 dark:text-slate-400">
-          Loading...
-        </div>
+        <div className="text-sm text-slate-600 dark:text-slate-400">Loading...</div>
       </div>
     );
   }
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
+function RoleRoute({
+  children,
+  roles,
+}: {
+  children: React.ReactNode;
+  roles: string[];
+}) {
+  const { hasRole, loading } = useAuth();
+  if (loading) return null;
+  const allowed = roles.some((r) => hasRole(r));
+  if (!allowed) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
@@ -55,33 +69,204 @@ function App() {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route
+          path="/analytics"
+          element={
+            <RoleRoute roles={['Super Admin', 'SUPER_ADMIN', 'Admin', 'ADMIN', 'Manager', 'MANAGER']}>
+              <AnalyticsPage />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/recovery"
+          element={
+            <RoleRoute roles={['Super Admin', 'SUPER_ADMIN', 'Admin', 'ADMIN', 'Manager', 'MANAGER', 'Loan Officer', 'LOAN_OFFICER']}>
+              <RecoveryPage />
+            </RoleRoute>
+          }
+        />
 
-        <Route path="/products" element={<ProductListPage />} />
+        {/* Products — Admin & Super Admin */}
+        <Route
+          path="/products"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin']}>
+              <ProductListPage />
+            </RoleRoute>
+          }
+        />
         <Route
           path="/products/new"
-          element={<ProductFormPage mode="create" />}
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin']}>
+              <ProductFormPage mode="create" />
+            </RoleRoute>
+          }
         />
         <Route
           path="/products/:id/edit"
-          element={<ProductFormPage mode="edit" />}
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin']}>
+              <ProductFormPage mode="edit" />
+            </RoleRoute>
+          }
         />
-        <Route path="/products/:id" element={<ProductDetailPage />} />
+        <Route
+          path="/products/:id"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin']}>
+              <ProductDetailPage />
+            </RoleRoute>
+          }
+        />
 
-        <Route path="/loans" element={<LoanListPage />} />
-        <Route path="/loans/new" element={<LoanFormPage />} />
-        <Route path="/loans/:id" element={<LoanDetailPage />} />
-        <Route path="/approvals" element={<ApprovalWorkbenchPage />} />
+        {/* Customers — all except plain User */}
+        <Route
+          path="/customers"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin', 'Manager', 'Loan Officer']}>
+              <CustomerListPage />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/customers/new/individual"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin', 'Manager', 'Loan Officer']}>
+              <IndividualCustomerFormPage />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/customers/new/business"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin', 'Manager', 'Loan Officer']}>
+              <BusinessCustomerFormPage />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/customers/business/:id"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin', 'Manager', 'Loan Officer']}>
+              <BusinessCustomerDetailPage />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/customers/:id"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin', 'Manager', 'Loan Officer']}>
+              <CustomerDetailPage />
+            </RoleRoute>
+          }
+        />
 
-        <Route path="/disbursements" element={<DisbursementQueuePage />} />
-        <Route path="/disbursements/new" element={<DisbursementFormPage />} />
-        <Route path="/disbursements/:id" element={<DisbursementDetailPage />} />
+        {/* Loans — Loan Officer, Manager, Admin, Super Admin */}
+        <Route
+          path="/loans"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin', 'Manager', 'Loan Officer']}>
+              <LoanListPage />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/loans/new"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin', 'Manager', 'Loan Officer']}>
+              <LoanFormPage />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/loans/:id"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin', 'Manager', 'Loan Officer']}>
+              <LoanDetailPage />
+            </RoleRoute>
+          }
+        />
 
-        <Route path="/collections" element={<CollectionListPage />} />
-        <Route path="/collections/new" element={<CollectionFormPage />} />
-        <Route path="/collections/:id" element={<CollectionDetailPage />} />
+        {/* Approval — Manager, Admin, Super Admin only */}
+        <Route
+          path="/approvals"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin', 'Manager']}>
+              <ApprovalWorkbenchPage />
+            </RoleRoute>
+          }
+        />
 
-        <Route path="/settings/users" element={<UsersPage />} />
-        <Route path="/settings/fsp" element={<FspSettingsPage />} />
+        {/* Disbursements — Manager, Admin, Super Admin */}
+        <Route
+          path="/disbursements"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin', 'Manager']}>
+              <DisbursementQueuePage />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/disbursements/new"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin', 'Manager']}>
+              <DisbursementFormPage />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/disbursements/:id"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin', 'Manager']}>
+              <DisbursementDetailPage />
+            </RoleRoute>
+          }
+        />
+
+        {/* Collections — Manager, Admin, Super Admin */}
+        <Route
+          path="/collections"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin', 'Manager']}>
+              <CollectionListPage />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/collections/new"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin', 'Manager']}>
+              <CollectionFormPage />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/collections/:id"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin', 'Manager']}>
+              <CollectionDetailPage />
+            </RoleRoute>
+          }
+        />
+
+        {/* Settings — Admin & Super Admin only */}
+        <Route
+          path="/settings/users"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin']}>
+              <UsersPage />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/settings/fsp"
+          element={
+            <RoleRoute roles={['Super Admin', 'Admin']}>
+              <FspSettingsPage />
+            </RoleRoute>
+          }
+        />
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

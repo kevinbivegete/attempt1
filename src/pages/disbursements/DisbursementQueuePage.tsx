@@ -1,146 +1,221 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  disbursementService,
-  Disbursement,
-} from '../../services/disbursement.service';
+import { disbursementService, Disbursement } from '../../services/disbursement.service';
+import { loanService, Loan } from '../../services/loan.service';
 import { getErrorMessage } from '../../utils/errorHandler';
 
-type ViewFilter = 'pending-processing' | 'failed' | 'completed';
+const disbStatusBadge = (status: string) => {
+  const map: Record<string, string> = {
+    Pending:    'badge badge-warning',
+    Processing: 'badge badge-info',
+    Completed:  'badge badge-success',
+    Failed:     'badge badge-danger',
+    Reversed:   'badge badge-neutral',
+  };
+  return map[status] ?? 'badge badge-neutral';
+};
+
+const fmt = (n: number) =>
+  new Intl.NumberFormat('en-RW', { minimumFractionDigits: 0 }).format(n);
+
+const fmtDate = (d: string) =>
+  new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
 export const DisbursementQueuePage = () => {
   const navigate = useNavigate();
+  const [approvedLoans, setApprovedLoans] = useState<Loan[]>([]);
   const [disbursements, setDisbursements] = useState<Disbursement[]>([]);
-  const [view, setView] = useState<ViewFilter>('pending-processing');
+  const [disbView, setDisbView] = useState<'all' | 'pending' | 'completed' | 'failed'>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadDisbursements = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await disbursementService.findAll();
-        setDisbursements(data);
-      } catch (err: any) {
-        setError(getErrorMessage(err));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDisbursements();
-  }, []);
-
-  const filtered = disbursements.filter((d) => {
-    if (view === 'pending-processing') {
-      return d.status === 'Pending' || d.status === 'Processing';
+  const load = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const [loans, disbs] = await Promise.all([
+        loanService.findAll({ status: 'Approved' }),
+        disbursementService.findAll(),
+      ]);
+      setApprovedLoans(loans);
+      setDisbursements(disbs);
+    } catch (err: any) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
     }
-    if (view === 'failed') return d.status === 'Failed';
-    if (view === 'completed') return d.status === 'Completed';
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const filteredDisb = disbursements.filter((d) => {
+    if (disbView === 'pending')   return d.status === 'Pending' || d.status === 'Processing';
+    if (disbView === 'completed') return d.status === 'Completed';
+    if (disbView === 'failed')    return d.status === 'Failed' || d.status === 'Reversed';
     return true;
   });
 
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
+  // For each approved loan, compute how much has already been disbursed
+  const loanDisbursedMap: Record<string, number> = {};
+  disbursements.forEach((d) => {
+    if (d.status === 'Completed') {
+      loanDisbursedMap[d.loanId] = (loanDisbursedMap[d.loanId] ?? 0) + d.amount;
+    }
+  });
 
-  const formatDate = (iso: string) =>
-    new Date(iso).toISOString().slice(0, 10);
+  // Only show approved loans that still have a remaining balance
+  const readyToDisburse = approvedLoans.filter((l) => {
+    const disbursed = loanDisbursedMap[l.id] ?? 0;
+    return (l.approvedAmount ?? 0) - disbursed > 0;
+  });
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
-          Disbursement Queue
-        </h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-          Monitor pending, processing, failed, and completed disbursements.
-        </p>
-      </div>
+    <div className="space-y-6">
 
-      <div className="flex flex-wrap gap-2 text-xs text-slate-700 dark:text-slate-300">
-        <select
-          value={view}
-          onChange={(e) => setView(e.target.value as ViewFilter)}
-          className="rounded-md border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 py-1 text-slate-900 dark:text-slate-100"
-        >
-          <option value="pending-processing">View: Pending & Processing</option>
-          <option value="failed">View: Failed</option>
-          <option value="completed">View: Completed</option>
-        </select>
+      {/* Header */}
+      <div className="page-header mb-0">
+        <h1 className="page-title">Disbursement Queue</h1>
+        <p className="page-subtitle">Disburse approved loans and track all disbursement transactions.</p>
       </div>
 
       {error && (
-        <div className="rounded-md bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 px-3 py-2 text-xs text-rose-700 dark:text-rose-300">
-          {error}
-        </div>
+        <div className="border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-700">{error}</div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60">
-        {loading ? (
-          <div className="flex items-center justify-center py-8 text-xs text-slate-600 dark:text-slate-400">
-            Loading disbursements...
+      {loading ? (
+        <div className="flex items-center justify-center py-16 text-xs text-neutral-400">
+          Loading…
+        </div>
+      ) : (
+        <div className="space-y-6">
+
+          {/* ── Section 1: Approved loans ready to disburse ── */}
+          <div>
+            <div className="mb-3 flex items-center gap-2">
+              <span className="badge badge-success">{readyToDisburse.length}</span>
+              <h2 className="text-xs font-semibold text-neutral-700">Approved — Ready to Disburse</h2>
+            </div>
+
+            <div className="card overflow-hidden">
+              {readyToDisburse.length === 0 ? (
+                <div className="py-12 text-center text-xs text-neutral-400">
+                  No approved loans awaiting disbursement.
+                </div>
+              ) : (
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Loan #</th>
+                      <th>Customer ID</th>
+                      <th className="text-right">Approved (RWF)</th>
+                      <th className="text-right">Disbursed (RWF)</th>
+                      <th className="text-right">Remaining (RWF)</th>
+                      <th>Approved On</th>
+                      <th className="text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {readyToDisburse.map((l) => {
+                      const disbursed  = loanDisbursedMap[l.id] ?? 0;
+                      const remaining  = (l.approvedAmount ?? 0) - disbursed;
+                      return (
+                        <tr key={l.id}>
+                          <td
+                            className="cursor-pointer font-medium text-primary-700 hover:underline"
+                            onClick={() => navigate(`/loans/${l.id}`)}
+                          >
+                            {l.loanNumber}
+                          </td>
+                          <td className="font-mono text-neutral-500">{l.customerId.slice(0, 8)}…</td>
+                          <td className="text-right font-semibold text-neutral-800">{fmt(l.approvedAmount ?? 0)}</td>
+                          <td className="text-right text-neutral-500">{fmt(disbursed)}</td>
+                          <td className="text-right font-semibold text-primary-700">{fmt(remaining)}</td>
+                          <td className="text-neutral-500">
+                            {l.approvalDate ? fmtDate(l.approvalDate) : '—'}
+                          </td>
+                          <td className="text-right">
+                            <button
+                              onClick={() => navigate('/disbursements/new', { state: { loanId: l.id } })}
+                              className="btn-primary py-1 px-3 text-[10px]"
+                            >
+                              Disburse
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
-        ) : filtered.length === 0 ? (
-          <div className="px-4 py-8 text-center text-xs text-slate-600 dark:text-slate-400">
-            No disbursements found
+
+          {/* ── Section 2: Disbursement transactions ── */}
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="badge badge-neutral">{filteredDisb.length}</span>
+                <h2 className="text-xs font-semibold text-neutral-700">Disbursement Transactions</h2>
+              </div>
+              <select
+                value={disbView}
+                onChange={(e) => setDisbView(e.target.value as typeof disbView)}
+                className="form-select w-44"
+              >
+                <option value="all">All</option>
+                <option value="pending">Pending / Processing</option>
+                <option value="completed">Completed</option>
+                <option value="failed">Failed / Reversed</option>
+              </select>
+            </div>
+
+            <div className="card overflow-hidden">
+              {filteredDisb.length === 0 ? (
+                <div className="py-12 text-center text-xs text-neutral-400">
+                  No disbursement transactions found.
+                </div>
+              ) : (
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Ref #</th>
+                      <th>Loan ID</th>
+                      <th>Channel</th>
+                      <th>Recipient</th>
+                      <th className="text-right">Amount (RWF)</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th className="text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredDisb.map((d) => (
+                      <tr key={d.id}>
+                        <td className="font-medium text-neutral-800">{d.disbursementNumber}</td>
+                        <td className="font-mono text-neutral-500">{d.loanId.slice(0, 8)}…</td>
+                        <td>{d.channel}</td>
+                        <td className="text-neutral-500">{d.recipientName ?? '—'}</td>
+                        <td className="text-right font-semibold text-neutral-800">{fmt(d.amount)}</td>
+                        <td><span className={disbStatusBadge(d.status)}>{d.status}</span></td>
+                        <td className="text-neutral-500">{fmtDate(d.createdAt)}</td>
+                        <td className="text-right">
+                          <button
+                            onClick={() => navigate(`/disbursements/${d.id}`)}
+                            className="text-[10px] font-medium text-primary-700 hover:underline"
+                          >
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
-        ) : (
-          <table className="min-w-full text-left text-xs">
-            <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-700 dark:text-slate-400">
-              <tr>
-                <th className="px-4 py-2 font-medium">Disbursement #</th>
-                <th className="px-4 py-2 font-medium">Loan #</th>
-                <th className="px-4 py-2 font-medium">Channel</th>
-                <th className="px-4 py-2 font-medium">Amount</th>
-                <th className="px-4 py-2 font-medium">Status</th>
-                <th className="px-4 py-2 font-medium">Created</th>
-                <th className="px-4 py-2 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((d) => (
-                <tr
-                  key={d.id}
-                  className="border-t border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60"
-                >
-                  <td className="px-4 py-2 text-slate-900 dark:text-slate-100">
-                    {d.disbursementNumber}
-                  </td>
-                  <td className="px-4 py-2 text-slate-700 dark:text-slate-200">
-                    {d.loanId}
-                  </td>
-                  <td className="px-4 py-2 text-slate-700 dark:text-slate-200">
-                    {d.channel}
-                  </td>
-                  <td className="px-4 py-2 text-slate-700 dark:text-slate-200">
-                    {formatCurrency(d.amount)}
-                  </td>
-                  <td className="px-4 py-2">
-                    <span className="inline-flex rounded-full bg-amber-100 dark:bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:text-amber-300">
-                      {d.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2 text-slate-600 dark:text-slate-300">
-                    {formatDate(d.createdAt)}
-                  </td>
-                  <td className="px-4 py-2 text-right">
-                    <button
-                      onClick={() => navigate(`/disbursements/${d.id}`)}
-                      className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300"
-                    >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+
+        </div>
+      )}
     </div>
   );
 };
